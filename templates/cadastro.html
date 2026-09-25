@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - CorteFácil</title>
+
+    <!-- Importando a Fonte 'Poppins' -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Importando a biblioteca de ícones da Phosphor Icons -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    
+    <!-- Lembre-se de conectar o seu CSS aqui! -->
+    <link rel="stylesheet" href="../src\css\style.css">
+</head>
+<body>
+    <img src="../src/assets/logo-topo.png" alt="Logo CorteFácil" class="logo-topo">
+    <div id="login-container">
+        <h2>Crie sua conta</h2> 
+        
+        <form action="/cadastro" method="POST">
+            
+            <!-- Categoria (Select Personalizado) -->
+            <div class="input-wrapper custom-select-wrapper">
+                <i class="ph ph-bookmark-simple"></i>
+                
+                <!-- 1. Input escondido: é ele que vai guardar o valor e enviar para o backend/Python -->
+                <input type="hidden" name="categoria" id="categoria-hidden" required>
+
+                <!-- 2. A caixa visual que o utilizador clica -->
+                <div class="custom-select-trigger" id="categoria-trigger">
+                    <span>Selecione o seu perfil</span>
+                    <i class="ph ph-caret-down seta-select"></i>
+                </div>
+
+                <!-- 3. A lista de opções que vamos desenhar com CSS -->
+                <ul class="custom-select-options">
+                    <li data-value="Cliente">Cliente</li>
+                    <li data-value="Barbeiro">Barbeiro</li>
+                </ul>
+            </div>
+
+            <!-- Campo: Nome -->
+            <div class="input-wrapper">
+                <!-- Usamos o ph-user para o nome -->
+                <i class="ph ph-user"></i>
+                <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+            </div>
+
+            <!-- Campo: E-mail -->
+            <div class="input-wrapper">
+                <!-- Usamos o ph-envelope para e-mail para diferenciar do nome -->
+                <i class="ph ph-envelope"></i>
+                <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
+            </div>
+
+            <!-- Campo: Telefone -->
+            <div class="input-wrapper">
+                <!-- Ícone de telefone -->
+                <i class="ph ph-phone"></i>
+                <input type="tel" id="telefone" name="telefone" placeholder="Seu telefone" required>
+            </div>
+            
+            <!-- Campo: Senha -->
+            <div class="input-wrapper">
+                <i class="ph ph-lock"></i>
+                <input type="password" id="password" name="password" placeholder="Crie uma senha" required>
+            </div>
+
+            <!-- Campo: Confirmação Senha -->
+            <div class="input-wrapper">
+                <i class="ph ph-lock"></i>
+                <input type="password" id="password confirm-password" name="password" placeholder="Confirme sua senha" required>
+            </div>
+            
+            <button type="submit">Cadastrar</button>
+        </form>
+        
+        <p>Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+    </div>
+    <!-- Script para controlar o Select Customizado -->
+    <script>
+        // Esperamos que a página carregue completamente
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Encontrar os elementos no ecrã
+            const selectWrapper = document.querySelector('.custom-select-wrapper');
+            const selectTrigger = document.querySelector('#categoria-trigger');
+            const options = document.querySelectorAll('.custom-select-options li');
+            const hiddenInput = document.querySelector('#categoria-hidden');
+            const spanText = selectTrigger.querySelector('span');
+
+            // 2. Abrir e Fechar o menu ao clicar na caixa
+            selectTrigger.addEventListener('click', function(evento) {
+                selectWrapper.classList.toggle('open');
+            });
+
+            // 3. O que acontece quando clicamos numa opção?
+            options.forEach(function(opcao) {
+                opcao.addEventListener('click', function() {
+                    // Substitui o texto da caixa pelo texto da opção escolhida
+                    spanText.textContent = this.textContent;
+                    
+                    // Adiciona a classe que deixa o texto azul escuro (removendo aspeto de placeholder)
+                    selectTrigger.classList.add('selected');
+                    
+                    // Coloca o valor ("Cliente" ou "Barbeiro") no nosso input invisível!
+                    hiddenInput.value = this.getAttribute('data-value');
+                    
+                    // Fecha o menu
+                    selectWrapper.classList.remove('open');
+                });
+            });
+
+            // 4. Fechar o menu se o utilizador clicar em qualquer outro lugar do ecrã
+            document.addEventListener('click', function(evento) {
+                if (!selectWrapper.contains(evento.target)) {
+                    selectWrapper.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

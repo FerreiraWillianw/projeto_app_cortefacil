@@ -1,0 +1,235 @@
+:root {
+    --primary-color: #090c9b;
+    --light-primary: #3d52d5;
+    --secondary-color: #94d3bc;
+    --light-color: #fbfff1;
+    --dark-color: #3c3744;
+    --contrast-lightcolor: #76a500;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--light-color);
+    color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 20px;
+}
+
+.logo-topo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1))
+}
+
+#login-container {
+    width: 100%;
+    max-width: 430px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0px 10px 35px rgba(0, 0, 0, 0.25); /* Suavizei um pouco a sombra para ficar mais moderna */
+    text-align: center;
+
+}
+
+#login-container h2 {
+    margin-bottom: 10px
+}
+
+/* Container que envolve o input e o ícone */
+.input-wrapper {
+    position: relative; /* Define que esta div é a âncora para o ícone */
+    width: 100%;
+    margin-bottom: 20px; /* Espaço para o campo de baixo */
+}
+
+/* Configuração do Ícone */
+.input-wrapper i {
+    position: absolute; /* Tira o ícone do fluxo normal, permitindo movê-lo livremente */
+    left: 12px; /* Empurra 12 pixels da margem esquerda para dentro */
+    top: 50%; /* Coloca no meio vertical da div */
+    transform: translateY(-50%); /* Ajuste fino matemático para centralizar perfeitamente na vertical */
+    
+    font-size: 20px; /* Tamanho do ícone */
+    color: #888; /* Cor cinza para o ícone */
+}
+
+/* Configuração do Input */
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* IMPORTANTE: 40px de espaço na esquerda para o texto não cobrir o ícone! */
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bordas arredondadas */
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+    color: var(--primary-color);
+    background-color: white;
+}
+
+.input-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.input-wrapper .seta-select {
+    left: auto;
+    right: 12px;
+    pointer-events: none;
+}
+
+/* Estilo quando clica no campo */
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    outline: none;
+    border-color: var(--primary-color); /* Dourado */
+}
+
+/* Se o campo estiver focado, acende o ícone também */
+.input-wrapper input:focus + i, 
+.input-wrapper select:focus + i,
+.input-wrapper:focus-within i:not(.seta-select) {
+    color: var(--primary-color);
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #3d52d5;
+}
+
+#login-container p {
+    margin-top: 25px;
+    font-size: 14px;
+    color: var(--primary-color)
+}
+
+#login-container p a{
+    color: var(--contrast-lightcolor);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#login-container p a:hover{
+    text-decoration: underline;
+   
+}
+
+@media screen and (max-width: 480px) {
+    #login-container {
+        padding: 25px 20px; /* Reduz o espaçamento interno (Cima/Baixo: 25px, Lados: 20px) */
+        border-radius: 8px; /* Cantos levemente menos arredondados em telas pequenas */
+    }
+
+    #login-container h2 {
+        font-size: 22px; /* Diminui o título de leve */
+    }
+
+    #login-container p {
+        font-size: 12px;
+    }
+}
+
+/* =========================================
+   CUSTOM SELECT (MENU DE OPÇÕES PERSONALIZADO)
+   ========================================= */
+.custom-select-wrapper {
+    position: relative;
+    user-select: none; /* Evita que o texto seja selecionado acidentalmente ao clicar */
+}
+
+/* O visual da caixa fechada (imita o input normal) */
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* Mantém o espaço para o ícone da esquerda */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #ffffff;
+    color: #888; /* Cor cinza (estilo placeholder) */
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Quando uma opção é escolhida, a cor muda para a principal */
+.custom-select-trigger.selected {
+    color: var(--primary-color);
+}
+
+/* Quando o menu está aberto (focado) */
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--primary-color);
+}
+.custom-select-wrapper.open i:first-child {
+    color: var(--primary-color); /* Pinta o ícone do bookmark de azul */
+}
+
+/* A lista suspensa (as opções) */
+.custom-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 5px; /* Espacinho entre a caixa e a lista */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    
+    /* Escondido por padrão usando opacidade e visibilidade para permitir animação suave */
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10; /* Garante que flutua por cima dos outros inputs */
+    list-style: none; /* Remove as bolinhas da lista (ul) */
+    overflow: hidden; /* Mantém os cantos arredondados */
+}
+
+/* Mostra a lista quando o wrapper ganha a classe 'open' */
+.custom-select-wrapper.open .custom-select-options {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Estilo individual de cada opção (li) */
+.custom-select-options li {
+    padding: 12px 15px 12px 10px; /* Alinhado com o texto principal */
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Efeito ao passar o rato (hover) na opção - usa a tua variável secundária! */
+.custom-select-options li:hover {
+    background-color: var(--light-primary); 
+    color: var(--light-color);
+}
