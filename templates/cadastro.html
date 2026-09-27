@@ -13,53 +13,61 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
     <!-- Lembre-se de conectar o seu CSS aqui! -->
-    <link rel="stylesheet" href="../src\css\style.css">
+    <link rel="stylesheet" href="../src/css/style.css">
 </head>
 <body>
     <img src="../src/assets/logo-topo.png" alt="Logo CorteFácil" class="logo-topo">
     <div id="login-container">
-        <h2>Crie sua conta</h2> 
-        
-        <form id="form-cadastro" action="/cadastro" method="POST">
+        <!-- SEÇÃO 1: FORMULÁRIO DE DADOS -->
+        <div id="secao-dados">
+            <h2>Crie sua conta</h2> 
             
-            <!-- Campo: Nome -->
-            <div class="input-wrapper">
-                <!-- Usamos o ph-user para o nome -->
-                <i class="ph ph-user"></i>
-                <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
-            </div>
+            <form id="form-cadastro">
+                <div class="input-wrapper">
+                    <i class="ph ph-user"></i>
+                    <input type="text" id="nome" placeholder="Seu nome completo" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="ph ph-envelope"></i>
+                    <input type="email" id="email" placeholder="Seu e-mail" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="ph ph-phone"></i>
+                    <input type="tel" id="telefone" placeholder="Seu telefone" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="ph ph-lock"></i>
+                    <input type="password" id="senha" placeholder="Crie uma senha" required>
+                </div>
+                <div class="input-wrapper">
+                    <i class="ph ph-lock"></i>
+                    <input type="password" id="confirmar-senha" placeholder="Confirme sua senha" required>
+                </div>
+                <button type="submit" id="btn-enviar-dados">Cadastrar</button>
+            </form>
+            <p>Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+        </div>
 
-            <!-- Campo: E-mail -->
-            <div class="input-wrapper">
-                <!-- Usamos o ph-envelope para e-mail para diferenciar do nome -->
-                <i class="ph ph-envelope"></i>
-                <input type="email" id="email" name="email" placeholder="Seu e-mail" required>
-            </div>
+        <!-- SEÇÃO 2: VERIFICAÇÃO DE CÓDIGO (Começa invisível) -->
+        <div id="secao-verificacao" style="display: none; text-align: center;">
+            <h2>Verifique seu e-mail</h2>
+            <p style="margin-bottom: 20px; font-size: 14px; color: #666;">
+                Enviamos um código de 6 dígitos para o seu e-mail. Ele é válido por 2 minutos.
+            </p>
 
-            <!-- Campo: Telefone -->
+            <!-- AQUI ENTRA O NOSSO RELÓGIO E O BOTÃO DE REENVIAR -->
+            <p id="temporizador-texto" style="color: #d9534f; font-weight: bold; margin-bottom: 15px;">02:00</p>
+            <button type="button" id="btn-reenviar-codigo" style="display: none; margin-bottom: 15px; background-color: #666;">Reenviar Código</button>
+            
             <div class="input-wrapper">
-                <!-- Ícone de telefone -->
-                <i class="ph ph-phone"></i>
-                <input type="tel" id="telefone" name="telefone" placeholder="Seu telefone" required>
+                <i class="ph ph-key"></i>
+                <input type="text" id="codigo-digitado" placeholder="000000" maxlength="6" required>
             </div>
             
-            <!-- Campo: Senha -->
-            <div class="input-wrapper">
-                <i class="ph ph-lock"></i>
-                <input type="password" id="senha" name="senha" placeholder="Crie uma senha" required>
-            </div>
-
-            <!-- Campo: Confirmação Senha -->
-            <div class="input-wrapper">
-                <i class="ph ph-lock"></i>
-                <input type="password" id="confirmar-senha" name="confirmar-senha" placeholder="Confirme sua senha" required>
-            </div>
-            
-            <button type="submit">Cadastrar</button>
-        </form>
-        
-        <p>Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+            <button type="button" id="btn-validar-codigo">Validar e Criar Conta</button>
+        </div>
     </div>
-    
+
+    <script src="../src/js/cadastro.js"></script>
 </body>
 </html>
