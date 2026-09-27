@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel - CorteFácil</title>
+    <title>Painel do Barbeiro - CorteFácil</title>
     
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
-    <link rel="stylesheet" href="../src/css/dashboard.css">
+    <link rel="stylesheet" href="../src/css/pagina_inicial.css">
 </head>
 <body>
 
     <!-- ==========================================
-         MENU LATERAL (INTELIGENTE)
+         MENU LATERAL (EXCLUSIVO DO BARBEIRO)
          ========================================== -->
     <aside id="sidebar">
         <div class="logo-container">
@@ -24,21 +24,14 @@
         
         <nav>
             <ul>
-                <!-- VISÍVEL APENAS PARA CLIENTES -->
-                <li class="item-cliente">
-                    <a href="#agendar" class="ativo"><i class="ph ph-calendar-plus"></i> Agendar Horário</a>
+                <!-- A classe 'ativo' marca qual página estamos a ver agora -->
+                <li>
+                    <a href="#minha-agenda" class="ativo"><i class="ph ph-calendar-check"></i> Minha Agenda</a>
                 </li>
-
-                <!-- VISÍVEL APENAS PARA BARBEIROS (Escondido por padrão) -->
-                <li class="item-barbeiro" style="display: none;">
-                    <a href="#minha-agenda"><i class="ph ph-calendar-check"></i> Minha Agenda</a>
-                </li>
-                <li class="item-barbeiro" style="display: none;">
+                <li>
                     <a href="#meus-servicos"><i class="ph ph-scissors"></i> Meus Serviços</a>
                 </li>
-
-                <!-- VISÍVEL PARA AMBOS -->
-                <li class="item-comum">
+                <li>
                     <a href="#perfil"><i class="ph ph-user"></i> Meu Perfil</a>
                 </li>
             </ul>
@@ -50,57 +43,34 @@
     </aside>
 
     <!-- ==========================================
-         ÁREA PRINCIPAL
+         ÁREA PRINCIPAL (GESTÃO DA BARBEARIA)
          ========================================== -->
     <main id="conteudo-principal">
 
-        <!-- ==========================================
-             MÓDULOS DO CLIENTE
-             ========================================== -->
-        <!-- ABA: AGENDAR HORÁRIO -->
-        <section id="secao-agendar" class="modulo-cliente">
-            <header class="cabecalho-secao">
-                <h2>Agendar Horário</h2>
-                <p>Selecione uma barbearia para marcar o seu corte.</p>
-            </header>
-
-            <div id="lista-barbearias" class="cards-container">
-                <div class="card-barbearia">
-                    <div class="card-info">
-                        <h3>Barbearia do João</h3>
-                        <p><i class="ph ph-map-pin"></i> Centro, Vassouras - RJ</p>
-                    </div>
-                    <button class="btn-selecionar-barbearia">Selecionar</button>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- ==========================================
-             MÓDULOS DO BARBEIRO
-             ========================================== -->
-        <!-- ABA: MINHA AGENDA (Escondida por padrão) -->
-        <section id="secao-minha-agenda" class="modulo-barbeiro" style="display: none;">
+        <!-- ABA 1: MINHA AGENDA (Visível por padrão) -->
+        <section id="secao-minha-agenda">
             <header class="cabecalho-secao">
                 <h2>Minha Agenda</h2>
                 <p>Estes são os teus próximos clientes.</p>
             </header>
             
-            <!-- Estrutura de exemplo de um compromisso -->
+            <!-- Lista de compromissos -->
             <div class="cards-container">
                 <div class="card-barbearia">
                     <div class="card-info">
+                        <!-- Como o cliente não tem conta, mostraremos o nome e telefone que ele preencheu -->
                         <h3>Carlos Silva</h3>
+                        <p><i class="ph ph-phone"></i> (24) 99999-1234</p>
                         <p><i class="ph ph-scissors"></i> Corte + Barba</p>
                         <p><i class="ph ph-clock"></i> Hoje às 14:30</p>
                     </div>
-                    <button class="btn-selecionar-barbearia" style="background-color: var(--secondary-color); color: var(--dark-color);">Concluído</button>
+                    <button class="btn-selecionar-barbearia" style="background-color: var(--secondary-color); color: var(--dark-color);">Marcar como Concluído</button>
                 </div>
             </div>
         </section>
 
-        <!-- ABA: MEUS SERVIÇOS (Escondida por padrão) -->
-        <section id="secao-meus-servicos" class="modulo-barbeiro" style="display: none;">
+        <!-- ABA 2: MEUS SERVIÇOS (Escondida por padrão) -->
+        <section id="secao-meus-servicos" style="display: none;">
             <header class="cabecalho-secao">
                 <h2>Meus Serviços</h2>
                 <p>Gere os cortes e preços que ofereces.</p>
@@ -113,29 +83,37 @@
                         <h3>Corte Clássico</h3>
                         <p>R$ 35,00 • 30 minutos</p>
                     </div>
+                    <!-- Botões de ação rápida para o barbeiro -->
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="btn-selecionar-barbearia" style="flex: 1; background-color: #eee; color: #333;">Editar</button>
+                        <button class="btn-selecionar-barbearia" style="flex: 1; background-color: #ffeaea; color: #d63031;">Excluir</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-
-        <!-- ==========================================
-             MÓDULO COMUM (PERFIL)
-             ========================================== -->
+        <!-- ABA 3: MEU PERFIL (Escondida por padrão) -->
         <section id="secao-perfil" style="display: none;">
             <header class="cabecalho-secao">
                 <h2>Meu Perfil</h2>
-                <p>Mantenha os seus dados de contacto atualizados.</p>
+                <p>Mantenha os dados da sua barbearia atualizados.</p>
             </header>
 
             <form id="form-perfil" class="formulario-padrao">
                 <div class="input-wrapper">
                     <i class="ph ph-user"></i>
-                    <input type="text" id="nome-perfil" value="Nome Teste" required>
+                    <input type="text" id="nome-perfil" value="João Barbeiro" required>
                 </div>
 
                 <div class="input-wrapper">
                     <i class="ph ph-phone"></i>
                     <input type="tel" id="telefone-perfil" value="(24) 99999-9999" required>
+                </div>
+
+                <!-- Como o barbeiro tem login, faz sentido ele poder alterar o e-mail aqui -->
+                <div class="input-wrapper">
+                    <i class="ph ph-envelope"></i>
+                    <input type="email" id="email-perfil" value="joao@cortefacil.com" required>
                 </div>
                 
                 <button type="submit" class="btn-selecionar-barbearia">Salvar Alterações</button>
@@ -143,11 +121,6 @@
         </section>
 
     </main>
-
-    <!-- Modal de Agendamento do Cliente (Inalterado) -->
-    <div id="modal-agendamento" class="modal-overlay" style="display: none;">
-        
-    </div>
 
 </body>
 </html>

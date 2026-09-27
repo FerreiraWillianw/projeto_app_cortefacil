@@ -22,26 +22,6 @@
         
         <form action="/cadastro" method="POST">
             
-            <!-- Categoria (Select Personalizado) -->
-            <div class="input-wrapper custom-select-wrapper">
-                <i class="ph ph-bookmark-simple"></i>
-                
-                <!-- 1. Input escondido: é ele que vai guardar o valor e enviar para o backend/Python -->
-                <input type="hidden" name="categoria" id="categoria-hidden" required>
-
-                <!-- 2. A caixa visual que o utilizador clica -->
-                <div class="custom-select-trigger" id="categoria-trigger">
-                    <span>Selecione o seu perfil</span>
-                    <i class="ph ph-caret-down seta-select"></i>
-                </div>
-
-                <!-- 3. A lista de opções que vamos desenhar com CSS -->
-                <ul class="custom-select-options">
-                    <li data-value="Cliente">Cliente</li>
-                    <li data-value="Barbeiro">Barbeiro</li>
-                </ul>
-            </div>
-
             <!-- Campo: Nome -->
             <div class="input-wrapper">
                 <!-- Usamos o ph-user para o nome -->
