@@ -20,7 +20,7 @@
     <div id="login-container">
         <h2>Crie sua conta</h2> 
         
-        <form action="/cadastro" method="POST">
+        <form id="form-cadastro" action="/cadastro" method="POST">
             
             <!-- Campo: Nome -->
             <div class="input-wrapper">
@@ -46,13 +46,13 @@
             <!-- Campo: Senha -->
             <div class="input-wrapper">
                 <i class="ph ph-lock"></i>
-                <input type="password" id="password" name="password" placeholder="Crie uma senha" required>
+                <input type="password" id="senha" name="senha" placeholder="Crie uma senha" required>
             </div>
 
             <!-- Campo: Confirmação Senha -->
             <div class="input-wrapper">
                 <i class="ph ph-lock"></i>
-                <input type="password" id="password confirm-password" name="password" placeholder="Confirme sua senha" required>
+                <input type="password" id="confirmar-senha" name="confirmar-senha" placeholder="Confirme sua senha" required>
             </div>
             
             <button type="submit">Cadastrar</button>
@@ -60,47 +60,6 @@
         
         <p>Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
     </div>
-    <!-- Script para controlar o Select Customizado -->
-    <script>
-        // Esperamos que a página carregue completamente
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // 1. Encontrar os elementos no ecrã
-            const selectWrapper = document.querySelector('.custom-select-wrapper');
-            const selectTrigger = document.querySelector('#categoria-trigger');
-            const options = document.querySelectorAll('.custom-select-options li');
-            const hiddenInput = document.querySelector('#categoria-hidden');
-            const spanText = selectTrigger.querySelector('span');
-
-            // 2. Abrir e Fechar o menu ao clicar na caixa
-            selectTrigger.addEventListener('click', function(evento) {
-                selectWrapper.classList.toggle('open');
-            });
-
-            // 3. O que acontece quando clicamos numa opção?
-            options.forEach(function(opcao) {
-                opcao.addEventListener('click', function() {
-                    // Substitui o texto da caixa pelo texto da opção escolhida
-                    spanText.textContent = this.textContent;
-                    
-                    // Adiciona a classe que deixa o texto azul escuro (removendo aspeto de placeholder)
-                    selectTrigger.classList.add('selected');
-                    
-                    // Coloca o valor ("Cliente" ou "Barbeiro") no nosso input invisível!
-                    hiddenInput.value = this.getAttribute('data-value');
-                    
-                    // Fecha o menu
-                    selectWrapper.classList.remove('open');
-                });
-            });
-
-            // 4. Fechar o menu se o utilizador clicar em qualquer outro lugar do ecrã
-            document.addEventListener('click', function(evento) {
-                if (!selectWrapper.contains(evento.target)) {
-                    selectWrapper.classList.remove('open');
-                }
-            });
-        });
-    </script>
+    
 </body>
 </html>
