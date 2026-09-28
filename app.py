@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
 
 import smtplib
 from email.mime.text import MIMEText
@@ -92,6 +93,8 @@ def fazer_cadastro():
     senha = dados.get('password')
     codigo_digitado = dados.get('codigo')
 
+    senha_criptografada = generate_password_hash(senha)
+
     registro = cadastros_pendentes.get(email_usuario)
 
     # Validações do Código
@@ -114,7 +117,7 @@ def fazer_cadastro():
             INSERT INTO barbeiros (nome, email, telefone, senha) 
             VALUES (%s, %s, %s, %s);
         """
-        cursor.execute(comando_sql, (nome, email_usuario, telefone, senha))
+        cursor.execute(comando_sql, (nome, email_usuario, telefone, senha_criptografada))
         conexao.commit()
         
         cursor.close()

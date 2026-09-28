@@ -37,7 +37,7 @@
                 </div>
                 <div class="input-wrapper">
                     <i class="ph ph-lock"></i>
-                    <input type="password" id="senha" placeholder="Crie uma senha" required>
+                    <input type="password" id="senha" placeholder="Digite uma senha" required>
                 </div>
                 <div class="input-wrapper">
                     <i class="ph ph-lock"></i>
@@ -52,19 +52,21 @@
         <div id="secao-verificacao" style="display: none; text-align: center;">
             <h2>Verifique seu e-mail</h2>
             <p style="margin-bottom: 20px; font-size: 14px; color: #666;">
-                Enviamos um código de 6 dígitos para o seu e-mail. Ele é válido por 2 minutos.
+                Enviamos um código de 6 dígitos para o e-mail <span id="email-destino" style="font-weight: bold; color: #333;"></span>. Ele é válido por 2 minutos.
             </p>
 
             <!-- AQUI ENTRA O NOSSO RELÓGIO E O BOTÃO DE REENVIAR -->
             <p id="temporizador-texto" style="color: #d9534f; font-weight: bold; margin-bottom: 15px;">02:00</p>
-            <button type="button" id="btn-reenviar-codigo" style="display: none; margin-bottom: 15px; background-color: #666;">Reenviar Código</button>
+            <button type="button" id="btn-reenviar-codigo" style="display: none; margin-bottom: 15px;">Reenviar Código</button>
             
             <div class="input-wrapper">
                 <i class="ph ph-key"></i>
                 <input type="text" id="codigo-digitado" placeholder="000000" maxlength="6" required>
             </div>
             
-            <button type="button" id="btn-validar-codigo">Validar e Criar Conta</button>
+            <button type="button" id="btn-validar-codigo">Validar</button>
+
+            <button type="button" id="btn-voltar" style="margin-top: 10px;">Voltar</button>
         </div>
     </div>
 

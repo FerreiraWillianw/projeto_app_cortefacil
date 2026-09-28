@@ -92,7 +92,7 @@ formCadastro.addEventListener('submit', async function(evento) {
 
     const regraSenhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    if (!regraSenhaForte.test(senhaDigitada)) {
+    if (!regraSenhaForte.test(senha)) {
         alert("❌ A senha precisa ter no mínimo 8 caracteres, com letras maísculas, minúsculas e caractere especial!");
         return;
     }
@@ -126,6 +126,7 @@ formCadastro.addEventListener('submit', async function(evento) {
         const dadosResposta = await resposta.json();
 
         if (dadosResposta.sucesso === true) {
+            document.getElementById('email-destino').textContent = emailDigitado
             // Escondemos o form e mostramos a caixinha do código
             secaoDados.style.display = 'none';
             secaoVerificacao.style.display = 'block';
@@ -198,7 +199,7 @@ btnValidarCodigo.addEventListener('click', async function() {
 
     const nomeDigitado = document.getElementById('nome').value;
     const emailDigitado = document.getElementById('email').value;
-    const telefoneDigitado = document.getElementById('telefone').value;
+    const telefoneDigitado = document.getElementById('telefone').value.replace(/\D/g, "");
     const senhaDigitada = document.getElementById('senha').value;
 
     btnValidarCodigo.textContent = 'Validando...';
@@ -233,4 +234,26 @@ btnValidarCodigo.addEventListener('click', async function() {
         btnValidarCodigo.textContent = 'Validar e Criar Conta';
         btnValidarCodigo.disabled = false;
     }
+});
+
+// ==========================================
+// BOTÃO VOLTAR (Cancela a verificação e retorna ao form)
+// ==========================================
+const btnVoltar = document.getElementById('btn-voltar');
+
+btnVoltar.addEventListener('click', function() {
+    // 1. Para o relógio para não ficar rodando em segundo plano
+    clearInterval(intervaloTemporizador);
+
+    // 2. Esconde a seção de verificação e mostra a seção de cadastro de volta
+    secaoVerificacao.style.display = 'none';
+    secaoDados.style.display = 'block';
+
+    // 3. Reativa o botão de envio original e reseta o seu texto
+    const btnEnviar = document.getElementById('btn-enviar-dados');
+    btnEnviar.textContent = 'Cadastrar';
+    btnEnviar.disabled = false;
+
+    // 4. Limpa o campo do código digitado
+    document.getElementById('codigo-digitado').value = '';
 });
