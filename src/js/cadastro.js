@@ -49,8 +49,40 @@ function iniciarTemporizador() {
     }, 1000); // Roda a cada 1000 milissegundos (1 segundo)
 }
 
+// Selecionamos o campo de telefone do HTML
+const inputTelefone = document.getElementById('telefone');
+
+// Ouvimos cada tecla que o usuário digita no campo de telefone
+inputTelefone.addEventListener('input', function(e) {
+    // 1. Pega o valor atual e remove TUDO o que não for número (\D significa "não-dígito")
+    let valor = e.target.value.replace(/\D/g, "");
+
+    // 2. Limita o tamanho máximo para 11 dígitos (DDD 2 + Celular 9)
+    if (valor.length > 11) {
+        valor = valor.substring(0, 11);
+    }
+
+    // 3. Aplica a formatação (máscara) dependendo do tamanho
+    if (valor.length > 10) {
+        // Formato Celular: (XX) XXXXX-XXXX
+        valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+    } else if (valor.length > 6) {
+        // Formato Fixo intermediário: (XX) XXXX-XXXX
+        valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+    } else if (valor.length > 2) {
+        // Apenas com DDD: (XX) XXXX
+        valor = valor.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+    } else if (valor.length > 0) {
+        // Apenas os primeiros dígitos: (XX
+        valor = valor.replace(/^(\d{0,2})/, "($1");
+    }
+
+    // 4. Devolve o valor formatado para a caixinha na tela
+    e.target.value = valor;
+});
+
 // ==========================================
-// ETAPA 1: SOLICITAR O CÓDIGO INICIALMENTE
+// ETAPA 1: ENVIAR O FORMULÁRIO CLICANDO NO BOTÃO DELE E SOLICITAR O CÓDIGO INICIALMENTE
 // ==========================================
 formCadastro.addEventListener('submit', async function(evento) {
     evento.preventDefault();
@@ -58,16 +90,31 @@ formCadastro.addEventListener('submit', async function(evento) {
     const senha = document.getElementById('senha').value;
     const confirmacao = document.getElementById('confirmar-senha').value;
 
+    const regraSenhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!regraSenhaForte.test(senhaDigitada)) {
+        alert("❌ A senha precisa ter no mínimo 8 caracteres, com letras maísculas, minúsculas e caractere especial!");
+        return;
+    }
+
     if (senha !== confirmacao) {
         alert('❌ As senhas não conferem!');
         return; 
     }
 
     const btnEnviar = document.getElementById('btn-enviar-dados');
-    btnEnviar.textContent = 'Enviando e-mail...';
+    btnEnviar.textContent = 'Cadastrando...';
     btnEnviar.disabled = true;
 
     const emailDigitado = document.getElementById('email').value;
+
+    // Validação do Telefone: Pegamos o valor e limpamos tudo o que não for número
+    const telefoneLimpo = document.getElementById('telefone').value.replace(/\D/g, "");
+
+    if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+        alert('❌ O telefone deve conter 10 ou 11 dígitos (incluindo o DDD).');
+        return; // Interrompe o envio
+    }
 
     try {
         const resposta = await fetch(BASE_URL + '/solicitar-codigo', {
