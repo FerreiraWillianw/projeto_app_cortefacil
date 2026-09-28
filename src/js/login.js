@@ -26,6 +26,9 @@ formLogin.addEventListener('submit', async function(evento) {
         const dadosResposta = await resposta.json();
 
         if (dadosResposta.sucesso === true) {
+            // NOVO: Guardamos os dados do barbeiro na memória do navegador (localStorage)
+            // Usamos JSON.stringify para transformar o objeto em texto, pois o localStorage só aceita texto
+            localStorage.setItem('barbeiro_logado', JSON.stringify(dadosResposta.usuario));
             alert("🎉 " + dadosResposta.mensagem);
 
             // Se deu tudo certo, redireciona o utilizador para a página principal!
@@ -42,4 +45,33 @@ formLogin.addEventListener('submit', async function(evento) {
         btnEntrar.textContent = 'Entrar';
         btnEntrar.disabled = false;
     }
-})
+});
+
+// ==========================================
+// MOSTRAR / ESCONDER SENHA (Copiado do Cadastro)
+// ==========================================
+const botoesVerSenha = document.querySelectorAll('.toggle-senha');
+
+botoesVerSenha.forEach(function(botao) {
+    
+    // O TRUQUE MÁGICO: Evita que o input perca o foco quando clicamos no ícone
+    botao.addEventListener('mousedown', function(evento) {
+        evento.preventDefault(); 
+    });
+
+    // A lógica de trocar o ícone e o tipo de texto
+    botao.addEventListener('click', function() {
+        const campoSenha = botao.previousElementSibling;
+
+        if (campoSenha.type === 'password') {
+            campoSenha.type = 'text';
+            botao.classList.remove('ph-eye');
+            botao.classList.add('ph-eye-closed');
+        } else {
+            campoSenha.type = 'password';
+            botao.classList.remove('ph-eye-closed');
+            botao.classList.add('ph-eye');
+        }
+    });
+});
+

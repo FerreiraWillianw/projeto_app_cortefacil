@@ -101,7 +101,11 @@ def fazer_login():
         if check_password_hash(senha_hash_banco, senha_digitada):
             return jsonify({
                 "sucesso": True,
-                "mensagem": f"Bem-vindo, {nome_banco}!"
+                "mensagem": f"Bem-vindo, {nome_banco}!",
+                "usuario": {
+                    "id": id_banco,
+                    "nome": nome_banco
+                }
             }), 200
         else:
             return jsonify({

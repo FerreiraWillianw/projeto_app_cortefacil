@@ -20,7 +20,7 @@
     <div id="login-container">
         <h2>Login</h2> 
         
-        <form id="form-login" action="/login" method="POST">
+        <form id="form-login">
             
             <!-- Grupo do E-mail -->
             <label for="email"></label>
@@ -33,13 +33,15 @@
             <label for="password"></label>
             <div class="input-wrapper">
                 <i class="ph ph-lock"></i>
-                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                <i class="ph ph-eye toggle-senha"></i>
             </div>
             
-            <button type="submit">Acessar</button>
+            <button id="btn-entrar" type="submit">Entrar</button>
         </form>
         
         <p>Ainda não tem conta? <a href="cadastro.html">Cadastre-se aqui</a></p>
     </div>
+    <script src="../src/js/login.js"></script>
 </body>
 </html>
