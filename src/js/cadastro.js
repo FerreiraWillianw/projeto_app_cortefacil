@@ -257,3 +257,38 @@ btnVoltar.addEventListener('click', function() {
     // 4. Limpa o campo do código digitado
     document.getElementById('codigo-digitado').value = '';
 });
+
+
+// ==========================================
+// MOSTRAR / ESCONDER SENHA
+// ==========================================
+// Seleciona todos os ícones de olho que criamos
+const botoesVerSenha = document.querySelectorAll('.toggle-senha');
+
+botoesVerSenha.forEach(function(botao) {
+
+    // Evita que o input perca o foco quando clicamos no ícone
+    botao.addEventListener('mousedown', function(evento){
+        evento.preventDefault();
+    });
+
+    botao.addEventListener('click', function() {
+        // Encontra o "irmão" do botão, ou seja, o campo <input> que está do lado dele
+        const campoSenha = botao.previousElementSibling;
+
+        // Se o campo for do tipo 'password', mudamos para 'text' (fica visível)
+        if (campoSenha.type === 'password') {
+            campoSenha.type = 'text';
+            // Muda o ícone para um olho cortado (Phosphor icon)
+            botao.classList.remove('ph-eye');
+            botao.classList.add('ph-eye-closed');
+        } 
+        // Se já for 'text', mudamos de volta para 'password' (fica oculto)
+        else {
+            campoSenha.type = 'password';
+            // Muda o ícone de volta para o olho aberto
+            botao.classList.remove('ph-eye-closed');
+            botao.classList.add('ph-eye');
+        }
+    });
+});

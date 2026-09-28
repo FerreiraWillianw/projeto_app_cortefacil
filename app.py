@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import smtplib
 from email.mime.text import MIMEText
@@ -54,6 +54,65 @@ def enviar_email_codigo(destinatario, codigo):
     except Exception as e:
         print("Erro ao enviar e-mail:", e)
         return False
+
+# ==============================================================
+# ROTA: LOGIN
+# ==============================================================
+@app.route('/login', methods=['POST'])
+def fazer_login():
+    dados = request.get_json()
+    email_digitado = dados.get('email')
+    senha_digitada = dados.get('password')
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # 1. Buscamos do banco se existe algum barbeiro com este e-mail
+        # Pedimos para trazer o ID, o NOME e a SENHA (que está em hash)
+        comando_sql = """
+            SELECT
+                id, nome, senha
+            FROM
+                barbeiros
+            WHERE
+                email = %s;
+        """
+
+        cursor.execute(comando_sql, (email_digitado,))
+
+        # O fetchone() pega o primeiro resultado que encontrar.
+        usuario = cursor.fetchone()
+
+        cursor.close()
+        conexao.close()
+
+        # 2. Se o usuário for "None" (não encontrou nada no banco)
+        # Ele retorna uma "Tupla" (uma lista fixa) parecida com isso: (1, 'William', 'pbkdf2:sha256...')
+        if not usuario:
+            return jsonify({"sucesso": False, "mensagem": "E-mail ou senha incorretos"}), 401
+
+        # 3. Separamos os dados da Tupla nas suas respectivas variáveis
+        id_banco = usuario[0]
+        nome_banco = usuario[1]
+        senha_hash_banco = usuario[2]
+
+        # 4. Verificação da senha
+        if check_password_hash(senha_hash_banco, senha_digitada):
+            return jsonify({
+                "sucesso": True,
+                "mensagem": f"Bem-vindo, {nome_banco}!"
+            }), 200
+        else:
+            return jsonify({
+                "sucesso": False,
+                "mensagem": "E-mail ou senha incorretos."
+            }), 401
+
+    except Exception as erro:
+        print("ERRO NO LOGIN:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor!"}), 500
+
 
 # ==============================================================
 # ROTA 1: SOLICITAR O CÓDIGO
