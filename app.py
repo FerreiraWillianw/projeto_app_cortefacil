@@ -24,24 +24,38 @@ app = Flask(__name__)
 CORS(app)
 
 cadastros_pendentes = {}
+codigos_recuperacao = {}
 
 # 2. Função de E-mail
-def enviar_email_codigo(destinatario, codigo):
+def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
     mensagem = MIMEMultipart()
     mensagem['From'] = email_sistema
     mensagem['To'] = destinatario
-    mensagem['Subject'] = "Seu código de verificação - CorteFácil"
 
-    corpo_email = f"""
-    Olá!
-    
-    Você solicitou a criação de uma conta no CorteFácil.
-    Seu código de verificação é: {codigo}
-    
-    Este código é válido por apenas 2 minutos.
-    
-    Se não solicitou este código, ignore este e-mail.
-    """
+    # Escolhemos o Assunto e o Texto baseados no motivo
+    if motivo == "cadastro":
+        mensagem['Subject'] = "Seu código de verificação - CorteFácil"
+        corpo_email = f"""
+            Olá!
+                
+            Você solicitou a criação de uma conta no CorteFácil.
+            Seu código de verificação é: {codigo}
+                
+            Este código é válido por apenas 2 minutos.
+                
+            Se não solicitou este código, ignore este e-mail.
+        """
+    elif motivo == "recuperacao":
+        mensagem['Subject'] = "Recuperação de Senha - CorteFácil"
+        corpo_email = f"""
+            Olá!
+                
+            Você solicitou a recuperação da sua senha no CorteFácil.
+            Seu código de segurança para redefinir a senha é: {codigo}
+                
+            Se você não solicitou esta alteração, por favor ignore este e-mail. Ninguém pode acessar sua conta sem este código.
+        """
+
     mensagem.attach(MIMEText(corpo_email, 'plain'))
 
     try:
@@ -198,6 +212,94 @@ def fazer_cadastro():
         # Adicionamos este print para ver no terminal exatamente o que deu errado
         print("ERRO TÉCNICO NO BANCO:", erro)
         return jsonify({"sucesso": False, "mensagem": "Erro no servidor", "erro": str(erro)}), 500
+
+# ==============================================================
+# ROTA 4: SOLICITAR RECUPERAÇÃO DE SENHA
+# ==============================================================
+@app.route('/solicitar-recuperacao', methods=['POST'])
+def solicitar_recuperacao():
+    dados = request.get_json()
+    email_digitado = dados.get('email')
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # 1. Verifica se o e-mail existe no banco de dados
+        comando_sql = "SELECT id, nome FROM barbeiros WHERE email = %s;"
+        cursor.execute(comando_sql, (email_digitado,))
+        usuario = cursor.fetchone()
+
+        cursor.close()
+        conexao.close()
+
+        # 2. Se não existir, retornamos um erro, mas de forma genérica por segurança
+        if not usuario:
+            return jsonify({"sucesso": False, "mensagem": "Se este e-mail estiver registrado, receberá um código em breve."}), 200
+
+        # 3. Se existir, geramos um código de 6 dígitos
+        nome_barbeiro = usuario[1]
+        codigo_gerado = str(random.randint(100000, 999999))
+
+        # Guardamos o código na memória do Python, associado a este e-mail
+        codigos_recuperacao[email_digitado] = codigo_gerado
+
+        # 4. Lógica de envio de e-mail
+        sucesso_email = enviar_email_codigo(email_digitado, codigo_gerado, motivo="recuperacao")
+
+        if sucesso_email:
+            return jsonify({"sucesso": True, "mensagem": "Código enviado com sucesso! Verifique o seu e-mail."}), 200
+        else:
+            # Se a internet cair e o e-mail não for, apagamos o código da memória
+            # para não haver código fantasmas, e avisamos o utilizados
+            del codigos_recuperacao[email_digitado]
+            return jsonify({"sucesso": False, "mensagem": "Erro ao tentar enviar o e-mail. Tente novamente mais tarde."}), 500
+
+    except Exception as erro:
+        print("ERRO NA RECUPERAÇÃO:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+# ==============================================================
+# ROTA 5: REDEFINIR A SENHA (ATUALIZAR O BANCO)
+# ==============================================================
+@app.route('/redefinir-senha', methods=['POST'])
+def redefinir_senha():
+    dados = request.get_json()
+    email_digitado = dados.get('email')
+    codigo_digitado = dados.get('codigo')
+    nova_senha = dados.get('nova_senha')
+
+    try:
+        # 1. Verifica se o código bate com o que es´ta guardado na memória
+        codigo_real = codigos_recuperacao.get(email_digitado)
+
+        if not codigo_real or codigo_real != codigo_digitado:
+            return jsonify({"sucesso": False, "mensagem": "Código inválido ou expirado."}), 400
+
+        # 2. Se o código estiver certo, fazemos o Hash (criptografia) da nova senha
+        senha_criptografada = generate_password_hash(nova_senha)
+
+        # 3. Atualizamos a senha do barbeiro no banco de dados
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        comando_sql = "UPDATE barbeiros SET senha = %s WHERE email = %s;"
+        cursor.execute(comando_sql, (senha_criptografada, email_digitado))
+        conexao.commit()
+
+        cursor.close()
+        conexao.close()
+
+        # 4. Removemos o código da memória (para não ser usado duas vezes por hackers)
+        del codigos_recuperacao[email_digitado]
+
+        return jsonify({"sucesso": True, "mensagem": "Senha alterada com sucesso! Agora pode fazer o login."}), 200
+    
+    except Exception as erro:
+        print("ERRO AO REDEFINIR A SENHA:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
