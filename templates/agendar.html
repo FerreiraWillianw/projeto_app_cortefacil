@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Horário - CorteFácil</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+
+    <link rel="stylesheet" href="../src/css/style.css">
+</head>
+<body>
+    <img src="../src/assets/logo-topo.png" alt="Logo CorteFácil" class="logo-topo">
+
+    <div id="login-container">
+        <h2>Agendar Horário</h2>
+        <p style="margin-bottom: 20px;">Preencha os seus dados para agendar o horário.</p>
+
+        <form id="form-agendar">
+            <div class="input-wrapper">
+                <i class="ph ph-user"></i>
+                <input type="text" id="nome-cliente" placeholder="Seu nome completo">
+            </div>
+
+            <div class="input-wrapper">
+                <i class="ph ph-phone"></i>
+                <input type="tel" id="telefone-cliente" placeholder="Seu telefone (Whatsapp)" required>
+            </div>
+
+            <div class="input-wrapper">
+                <i class="ph ph-scissors"></i>
+                <select id="select-barbeiro" required>
+                    <option value="" disabled selected>Escolha o profissional...</option>
+                </select>
+                <i class="ph ph-caret-down seta-select"></i>
+            </div>
+
+            <div class="input-wrapper">
+                <i class="ph ph-calendar-blank"></i>
+                <input type="date" id="data-agendamento" required>
+            </div>
+
+            <div class="input-wrapper">
+                <i class="ph ph-clock"></i>
+                <input type="time" id="hora-agendamento" required>
+            </div>
+            
+            <button type="submit" id="btn-agendar" class="btn-selecionar-barbearia">Confirmar Agendamento</button>
+        </form>
+    </div>
+
+    <script src="../src/js/components/formatador_telefone.js"></script>
+    <script src="../src/js/agendar.js"></script>
+    
+</body>
+</html>

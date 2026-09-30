@@ -299,7 +299,76 @@ def redefinir_senha():
         print("ERRO AO REDEFINIR A SENHA:", erro)
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
+# ==============================================================
+# ROTA 6: LISTAR BARBEIROS (PARA A PÁGINA DO CLIENTE)
+# ==============================================================
+@app.route('/api/barbeiros', methods=['GET'])
+def listar_barbeiros():
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
 
+        # Buscamos apenas o ID e o Nome de todos os barbeiros
+        comando_sql = "SELECT id, nome FROM barbeiros ORDER BY nome ASC;"
+        cursor.execute(comando_sql)
+        barbeiros_banco = cursor.fetchall()
+
+        cursor.close()
+        conexao.close()
+
+        # Transformamos o resultado numa lista de dicionários para o Javascript entender
+        lista_barbeiros = []
+        for barbeiro in barbeiros_banco:
+            lista_barbeiros.append({
+                "id": barbeiro[0],
+                "nome": barbeiro[1]
+            })
+
+        return jsonify({"sucesso": True, "barbeiros": lista_barbeiros}), 200
+
+    except Exception as erro:
+        print("ERRO AO BUSCAR BARBEIROS:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+# ==============================================================
+# ROTA 7: BUSCAR DISPONIBILIDADE DO BARBEIRO
+# ==============================================================
+@app.route('/api/barbeiros/<int:barbeiro_id>/disponibilidade', methods=["GET"])
+def busccar_disponibilidade(barbeiro_id):
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        comando_sql = """
+            SELECT dia_semana, hora_inicio, hora_fim
+            FROM disponibilidade_barbeiro
+            WHERE barbeiro_id = %s
+            ORDER BY dia_semana ASC;
+        """
+
+        cursor.execute(comando_sql, (barbeiro_id,))
+        registros = cursor.fetchall()
+
+        cursor.close()
+        conexao.close()
+
+        # Monta a lista com os dias e jornadas cadastradas
+        dias_permitidos = []
+        for reg in registros:
+            dias_permitidos.append({
+                "dia_semana": reg[0],
+                "hora_inicio": str(reg[1]),
+                "hora_fim": str(reg[2])
+            })
+
+        return jsonify({
+            "sucesso": True, 
+            "disponibilidade": dias_permitidos
+        }), 200
+
+    except Exception as erro:
+        print("ERRO AO BUSCAR DISPONIBILIDADE:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
