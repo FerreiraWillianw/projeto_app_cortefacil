@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="../src/css/style.css">
 </head>
 <body>
@@ -38,18 +39,24 @@
 
             <div class="input-wrapper">
                 <i class="ph ph-calendar-blank"></i>
-                <input type="date" id="data-agendamento" required>
+                <!-- Mudou para type="text" -->
+                <input type="text" id="data-agendamento" placeholder="Escolha a data..." required>
             </div>
 
             <div class="input-wrapper">
                 <i class="ph ph-clock"></i>
-                <input type="time" id="hora-agendamento" required>
+                <select id="hora-agendamento" required disabled>
+                    <option value="" disabled selected>Escolha uma data primeiro...</option>
+                </select>
+                <i class="ph ph-caret-down seta-select"></i>
             </div>
             
             <button type="submit" id="btn-agendar" class="btn-selecionar-barbearia">Confirmar Agendamento</button>
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="../src/js/components/formatador_telefone.js"></script>
     <script src="../src/js/agendar.js"></script>
     
