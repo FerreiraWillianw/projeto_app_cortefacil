@@ -299,7 +299,201 @@ def redefinir_senha():
         print("ERRO AO REDEFINIR A SENHA:", erro)
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
+# ==============================================================
+# ROTA 6: LISTAR BARBEIROS (PARA A PÁGINA DO CLIENTE)
+# ==============================================================
+@app.route('/api/barbeiros', methods=['GET'])
+def listar_barbeiros():
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
 
+        # Buscamos apenas o ID e o Nome de todos os barbeiros
+        comando_sql = "SELECT id, nome FROM barbeiros ORDER BY nome ASC;"
+        cursor.execute(comando_sql)
+        barbeiros_banco = cursor.fetchall()
+
+        cursor.close()
+        conexao.close()
+
+        # Transformamos o resultado numa lista de dicionários para o Javascript entender
+        lista_barbeiros = []
+        for barbeiro in barbeiros_banco:
+            lista_barbeiros.append({
+                "id": barbeiro[0],
+                "nome": barbeiro[1]
+            })
+
+        return jsonify({"sucesso": True, "barbeiros": lista_barbeiros}), 200
+
+    except Exception as erro:
+        print("ERRO AO BUSCAR BARBEIROS:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+# ==============================================================
+# ROTA 7: BUSCAR DISPONIBILIDADE DO BARBEIRO
+# ==============================================================
+@app.route('/api/barbeiros/<int:barbeiro_id>/disponibilidade', methods=["GET"])
+def busccar_disponibilidade(barbeiro_id):
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        comando_sql = """
+            SELECT dia_semana, hora_inicio, hora_fim
+            FROM disponibilidade_barbeiro
+            WHERE barbeiro_id = %s
+            ORDER BY dia_semana ASC;
+        """
+
+        cursor.execute(comando_sql, (barbeiro_id,))
+        registros = cursor.fetchall()
+
+        cursor.close()
+        conexao.close()
+
+        # Monta a lista com os dias e jornadas cadastradas
+        dias_permitidos = []
+        for reg in registros:
+            dias_permitidos.append({
+                "dia_semana": reg[0],
+                "hora_inicio": str(reg[1]),
+                "hora_fim": str(reg[2])
+            })
+
+        return jsonify({
+            "sucesso": True, 
+            "disponibilidade": dias_permitidos
+        }), 200
+
+    except Exception as erro:
+        print("ERRO AO BUSCAR DISPONIBILIDADE:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+# ==============================================================
+# ROTA 8: BUSCAR HORÁRIOS DISPONÍVEIS NO DIA
+# ==============================================================
+@app.route('/api/barbeiros/<int:barbeiro_id>/horarios', methods=['GET'])
+def buscar_horarios(barbeiro_id):
+    # O JavaScript vai enviar a data no final do link, ex: ?data=2026-10-13
+    data_str = request.args.get('data') 
+
+    if not data_str:
+        return jsonify({"sucesso": False, "mensagem": "Data não informada."}), 400
+
+    try:
+        # 1. Converter a data de texto para um objeto que o Python entende
+        data_obj = datetime.strptime(data_str, '%Y-%m-%d')
+        
+        # TRUQUE: O Python diz que Segunda é 0 e Domingo é 6. 
+        # Nós usamos esta matemática para converter para o padrão do JS (Domingo = 0)
+        dia_semana = (data_obj.weekday() + 1) % 7 
+
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # 2. Buscar o horário de expediente do barbeiro neste dia
+        cursor.execute("""
+            SELECT hora_inicio, hora_fim
+            FROM disponibilidade_barbeiro
+            WHERE barbeiro_id = %s AND dia_semana = %s
+        """, (barbeiro_id, dia_semana))
+        expediente = cursor.fetchone()
+
+        # Se não houver expediente, devolvemos a lista vazia
+        if not expediente:
+            cursor.close()
+            conexao.close()
+            return jsonify({"sucesso": True, "horarios": []}), 200
+
+        hora_inicio_banco = expediente[0] # Ex: 08:00:00
+        hora_fim_banco = expediente[1]    # Ex: 19:00:00
+
+        # 3. Buscar os horários que JÁ ESTÃO OCUPADOS na tabela de agendamentos
+        cursor.execute("""
+            SELECT hora_agendamento
+            FROM agendamentos
+            WHERE barbeiro_id = %s AND data_agendamento = %s AND status != 'cancelado'
+        """, (barbeiro_id, data_str))
+        ocupados_banco = cursor.fetchall()
+
+        cursor.close()
+        conexao.close()
+
+        # Pegamos os resultados do banco e formatamos para texto "HH:MM" (Ex: "14:30")
+        horarios_ocupados = []
+        for ocupado in ocupados_banco:
+            hora_formatada = ocupado[0].strftime('%H:%M')
+            horarios_ocupados.append(hora_formatada)
+
+        # 4. A FÁBRICA DE HORÁRIOS (De 30 em 30 minutos)
+        horarios_livres = []
+
+        # Juntamos a data com a hora para o Python conseguir fazer as contas de tempo
+        hora_atual = datetime.combine(data_obj, hora_inicio_banco)
+        hora_final = datetime.combine(data_obj, hora_fim_banco)
+
+        # Enquanto a hora atual for menor que a hora de saída...
+        while hora_atual < hora_final:
+            hora_texto = hora_atual.strftime('%H:%M')
+
+            # Se este horário NÃO estiver na lista de ocupados, adicionamos aos livres!
+            if hora_texto not in horarios_ocupados:
+                horarios_livres.append(hora_texto)
+
+            # Dá um salto de 30 minutos para testar o próximo horário
+            hora_atual += timedelta(minutes=30)
+
+        return jsonify({"sucesso": True, "horarios": horarios_livres}), 200
+
+    except Exception as erro:
+        print("ERRO AO GERAR HORÁRIOS:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+
+# ==============================================================
+# ROTA 9: SALVAR O AGENDAMENTO NO BANCO DE DADOS
+# ==============================================================
+@app.route('/api/agendar', methods=['POST'])
+def criar_agendamento():
+    # Recebemos os dados enviados pelo JavaScript
+    dados = request.get_json()
+
+    nome = dados.get('nome')
+    telefone = dados.get('telefone')
+    barbeiro_id = dados.get('barbeiro_id')
+    data_agendamento = dados.get('data')
+    hora_agendamento = dados.get('hora')
+
+    # 1. Validação básica: garantir que nada chegou vazio
+    if not all([nome, telefone, barbeiro_id, data_agendamento, hora_agendamento]):
+        return jsonify({"sucesso": False, "mensagem": "Por favor, preencha todos os campos."}), 400
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+        
+        # 2. Comando SQL para Inserir (Gravar) os dados na tabela agendamentos
+        # O status e o criado_em são gerados automaticamente pelo banco!
+        comando_sql = """
+            INSERT INTO agendamentos (barbeiro_id, nome_cliente, telefone_cliente, data_agendamento, hora_agendamento)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+
+        # Executamos o comando substituindo os %s pelos dados reais
+        cursor.execute(comando_sql, (barbeiro_id, nome, telefone, data_agendamento, hora_agendamento))
+        conexao.commit() # O commit é o que realmente "salva" a alteração no banco
+        
+        cursor.close()
+        conexao.close()
+
+        return jsonify({"sucesso": True, "mensagem": "Agendamento realizado com sucesso! Esperamos por você."}), 201
+        
+    except Exception as erro:
+        print("ERRO AO SALVAR AGENDAMENTO:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro interno ao tentar salvar o agendamento."}), 500
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -13,8 +13,26 @@ input[type="password"]::-ms-clear,
 input[type="password"]::-webkit-contacts-auto-fill-button {
     display: none;
 }
-/*----------------------------------------------------------*/
 
+/* ==========================================
+   ESTILOS PERSONALIZADOS DO CALENDÁRIO (FLATPICKR)
+   ========================================== */
+
+/* Como os dias bloqueados (folgas e dias passados) devem aparecer */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #f70404 !important;             /* Texto cinzento claro */
+    background-color: #ff7777 !important;    /* Fundo ligeiramente cinzento */
+    text-decoration: line-through;           /* Faz um risco no meio do número (opcional, mas excelente para UX!) */
+    cursor: not-allowed !important;          /* Muda o cursor do rato para o símbolo de proibido 🚫 */
+    opacity: 0.7;                            /* Deixa o botão um pouco transparente */
+}
+
+/* Deixa o dia de hoje destacado com a nossa cor principal (se quiser) */
+.flatpickr-day.today {
+    border-color: var(--primary-color) !important;
+}
+/*----------------------------------------------------------*/
 
 
 * {
@@ -116,8 +134,6 @@ input#confirmar-senha {
 
 .input-wrapper select {
     appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     cursor: pointer;
 }
 
@@ -130,12 +146,10 @@ input#confirmar-senha {
 /* Estilo quando clica no campo */
 .input-wrapper input:focus,
 .input-wrapper select:focus {
-    outline: none;
     border-color: var(--primary-color); /* Dourado */
 }
 
-/* Se o campo estiver focado, acende o ícone também */
-.input-wrapper input:focus + i, 
+/* Se o campo estiver focado, acende o ícone também */ 
 .input-wrapper select:focus + i,
 .input-wrapper:focus-within i:not(.seta-select) {
     color: var(--primary-color);
@@ -301,4 +315,45 @@ button[type="submit"]:hover, #btn-validar-codigo:hover {
 .custom-select-options li:hover {
     background-color: var(--light-primary); 
     color: white;
+}
+
+@supports (appearance: base-select) {
+    .input-wrapper select,
+    .input-wrapper select::picker(select) {
+        appearance: base-select;
+    }
+
+    /* A caixa da lista */
+    .input-wrapper select::picker(select) {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 6px;
+        background: white;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        margin-top: 4px;
+    }
+
+    /* Cada opção */
+    .input-wrapper select option {
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+    }
+
+    .input-wrapper select option:hover,
+    .input-wrapper select option:focus {
+        background: var(--secondary-color);
+        color: (var(--primary-color));
+    }
+
+    .input-wrapper select option:checked {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Esconde a seta nativa nova, já que você tem a sua */
+    .input-wrapper select::picker-icon {
+        display: none;
+    }
 }
