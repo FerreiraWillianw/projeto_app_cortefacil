@@ -7,6 +7,8 @@
     
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Adicione isto na secção <head> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
@@ -53,19 +55,32 @@
                 <h2>Minha Agenda</h2>
                 <p>Estes são os teus próximos clientes.</p>
             </header>
-            
-            <!-- Lista de compromissos -->
-            <div class="cards-container">
-                <div class="card-barbearia">
-                    <div class="card-info">
-                        <!-- Como o cliente não tem conta, mostraremos o nome e telefone que ele preencheu -->
-                        <h3>Carlos Silva</h3>
-                        <p><i class="ph ph-phone"></i> (24) 99999-1234</p>
-                        <p><i class="ph ph-scissors"></i> Corte + Barba</p>
-                        <p><i class="ph ph-clock"></i> Hoje às 14:30</p>
-                    </div>
-                    <button class="btn-selecionar-barbearia" style="background-color: var(--secondary-color); color: var(--dark-color);">Marcar como Concluído</button>
+
+            <!-- ==========================================
+                 FILTROS DA AGENDA
+                 ========================================== -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <!-- Filtro de Data -->
+                <div class="input-wrapper" style="flex: 1; min-width: 200px; margin: 0;">
+                    <i class="ph ph-calendar-blank"></i>
+                    <input type="text" id="filtro-data" placeholder="Filtrar por data...">
                 </div>
+                
+                <!-- Filtro de Status -->
+                <div class="input-wrapper" style="flex: 1; min-width: 200px; margin: 0;">
+                    <i class="ph ph-funnel"></i>
+                    <select id="filtro-status" style="padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid #ccc; width: 100%; font-family: 'Poppins';">
+                        <option value="todos">Todos (Ativos)</option>
+                        <option value="pendente">Pendentes</option>
+                        <option value="concluido">Concluídos</option>
+                        <option value="cancelado">Cancelados</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Lista de compromissos que será preenchida pelo JavaScript -->
+            <div id="lista-agendamentos" class="cards-container">
+                <p style="text-align: center; color: #666;">A carregar a tua agenda...</p>
             </div>
         </section>
 
@@ -122,6 +137,9 @@
 
     </main>
 
+    <!-- Adicione os scripts do Flatpickr aqui no final -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="../src/js/pagina_inicial.js"></script>
 </body>
 </html>

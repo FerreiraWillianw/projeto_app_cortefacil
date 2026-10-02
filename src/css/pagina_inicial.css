@@ -105,20 +105,23 @@ nav a.ativo, nav a:hover {
 
 /* Container que segura os cartões */
 .cards-container {
-    display: grid;
-    grid-template-columns: 1fr; /* 1 coluna no telemóvel */
-    gap: 15px; /* Espaço entre os cartões */
+    display: flex;
+    flex-direction: column; /* Garante que ficam sempre um debaixo do outro */
+    gap: 15px;
+    width: 100%;
 }
 
 /* O aspeto do Cartão da Barbearia */
 .card-barbearia {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: column; /* Em telemóveis, os itens ficam em coluna */
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: 0.3s;
 }
 
 .card-info h3 {
@@ -239,4 +242,106 @@ nav a.ativo, nav a:hover {
     .cards-container {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Cria várias colunas automaticamente */
     }
+
+    .card-barbearia {
+        flex-direction: row; /* Fica retangular, lado a lado! */
+        align-items: center; /* Centraliza a informação com os botões */
+    }
+    
+    .card-barbearia .card-info {
+        display: flex;
+        gap: 20px; /* Coloca os dados do cliente lado a lado */
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .card-barbearia > div:last-child { /* A div dos botões */
+        margin-top: 0 !important;
+        min-width: 250px;
+        justify-content: flex-end;
+    }
+}
+
+/* ==========================================
+   BADGES DE STATUS (ETIQUETAS)
+   ========================================== */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px; /* Dá um espacinho do nome */
+}
+
+/* Cores das etiquetas */
+.badge-pendente {
+    background-color: #fef08a; /* Amarelo suave */
+    color: #854d0e;            /* Texto castanho/amarelo escuro */
+}
+
+.badge-concluido {
+    background-color: #d1fae5; /* Verde suave */
+    color: #065f46;            /* Texto verde escuro */
+}
+
+.badge-cancelado {
+    background-color: #fee2e2; /* Vermelho suave */
+    color: #991b1b;            /* Texto vermelho escuro */
+}
+
+/* ==========================================
+   ESTILIZAÇÃO DOS INPUTS E FILTROS
+   ========================================== */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Aplica o estilo bonito a qualquer input ou select dentro do wrapper */
+.input-wrapper input,
+.input-wrapper select {
+    width: 100%;
+    /* O segredo: 40px na esquerda para o texto não ficar por cima do ícone! */
+    padding: 12px 12px 12px 40px; 
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bordas arredondadas */
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    background-color: white;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Efeito quando clica no campo */
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* O ícone perfeitamente posicionado do lado esquerdo */
+.input-wrapper i:not(.seta-select) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #64748b;
+    pointer-events: none; /* Permite que o cliente clique "através" do ícone */
+}
+
+/* ==========================================
+   ESTILIZAÇÃO DOS DIAS BLOQUEADOS NO FLATPICKR
+   ========================================== */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #f70404 !important;             /* Texto avermelhado */
+    background-color: #ff7777 !important;    /* Fundo ligeiramente avermelhado */
+    text-decoration: line-through;           /* Faz um risco no meio do número */
+    cursor: not-allowed !important;          /* Muda o cursor do rato para proibido 🚫 */
+    opacity: 0.7;                            /* Deixa o botão um pouco transparente */
 }
