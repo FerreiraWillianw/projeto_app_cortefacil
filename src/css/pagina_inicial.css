@@ -261,3 +261,75 @@ nav a.ativo, nav a:hover {
         justify-content: flex-end;
     }
 }
+
+/* ==========================================
+   BADGES DE STATUS (ETIQUETAS)
+   ========================================== */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px; /* Dá um espacinho do nome */
+}
+
+/* Cores das etiquetas */
+.badge-pendente {
+    background-color: #fef08a; /* Amarelo suave */
+    color: #854d0e;            /* Texto castanho/amarelo escuro */
+}
+
+.badge-concluido {
+    background-color: #d1fae5; /* Verde suave */
+    color: #065f46;            /* Texto verde escuro */
+}
+
+.badge-cancelado {
+    background-color: #fee2e2; /* Vermelho suave */
+    color: #991b1b;            /* Texto vermelho escuro */
+}
+
+/* ==========================================
+   ESTILIZAÇÃO DOS INPUTS E FILTROS
+   ========================================== */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Aplica o estilo bonito a qualquer input ou select dentro do wrapper */
+.input-wrapper input,
+.input-wrapper select {
+    width: 100%;
+    /* O segredo: 40px na esquerda para o texto não ficar por cima do ícone! */
+    padding: 12px 12px 12px 40px; 
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bordas arredondadas */
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    background-color: white;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Efeito quando clica no campo */
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* O ícone perfeitamente posicionado do lado esquerdo */
+.input-wrapper i:not(.seta-select) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #64748b;
+    pointer-events: none; /* Permite que o cliente clique "através" do ícone */
+}

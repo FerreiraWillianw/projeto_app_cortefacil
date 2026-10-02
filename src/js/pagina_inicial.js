@@ -43,39 +43,45 @@ if (btnSair) {
 }
 
 // ==========================================
-// INTEGRAÇÃO COM O BACKEND (PYTHON)
+// INTEGRAÇÃO COM O BACKEND (PYTHON) E FILTROS
 // ==========================================
 const BASE_URL = 'http://127.0.0.1:5000';
-// Simulamos que o barbeiro logado no sistema tem o ID 1
 const MEU_ID_BARBEIRO = 1; 
 
-// Captura os campos de filtro
 const inputFiltroData = document.getElementById('filtro-data');
 const inputFiltroStatus = document.getElementById('filtro-status');
 
 // Assim que a página abre...
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Bloqueia o campo de filtro de data para não permitir selecionar o passado (igual à regra de agendamento)
-    const hoje = new Date().toISOString().split("T")[0];
-    inputFiltroData.setAttribute('min', hoje);
+    
+    // 1. Inicializa o Flatpickr bonito no filtro de data!
+    flatpickr(inputFiltroData, {
+        minDate: "today",       // Só permite filtrar de hoje em diante
+        locale: "pt",
+        dateFormat: "Y-m-d",    // O formato que o Python entende
+        altInput: true,
+        altFormat: "d/m/Y",     // O formato brasileiro (ex: 02/10/2026)
+        onChange: function() {
+            // Quando a data muda no Flatpickr, recarrega a agenda!
+            carregarMinhaAgenda();
+        }
+    });
 
+    // Carrega a agenda pela primeira vez
     carregarMinhaAgenda();
 });
 
-// Se o barbeiro mudar a data ou o status, recarrega a lista automaticamente!
-inputFiltroData.addEventListener('change', carregarMinhaAgenda);
+// Se o barbeiro mudar o status no select, recarrega a lista
 inputFiltroStatus.addEventListener('change', carregarMinhaAgenda);
 
 async function carregarMinhaAgenda() {
     const listaAgendamentos = document.getElementById('lista-agendamentos');
     listaAgendamentos.innerHTML = '<p style="text-align: center; color: #666;">A carregar a tua agenda...</p>';
 
-    // Pega os valores atuais dos filtros
     const dataFiltrada = inputFiltroData.value;
     const statusFiltrado = inputFiltroStatus.value;
 
     try {
-        // Monta o link (URL) passando os filtros para o Python
         let url = `${BASE_URL}/api/barbeiros/${MEU_ID_BARBEIRO}/agendamentos?status=${statusFiltrado}`;
         if (dataFiltrada) {
             url += `&data=${dataFiltrada}`;
@@ -98,23 +104,33 @@ async function carregarMinhaAgenda() {
                 const horaFormatada = ag.hora.slice(0, 5); 
                 const telefoneTexto = ag.telefone ? ag.telefone : 'Sem telefone';
 
+                // ==========================================
+                // LÓGICA DAS BADGES (ETIQUETAS VISUAIS)
+                // ==========================================
+                let badgeHTML = '';
+                if(ag.status === 'pendente') {
+                    badgeHTML = '<span class="badge badge-pendente">Pendente</span>';
+                } else if(ag.status === 'concluido') {
+                    badgeHTML = '<span class="badge badge-concluido">Concluído</span>';
+                } else if(ag.status === 'cancelado') {
+                    badgeHTML = '<span class="badge badge-cancelado">Cancelado</span>';
+                }
+
                 const card = document.createElement('div');
                 card.classList.add('card-barbearia');
                 
-                // MUDANÇA VISUAL: Adicionamos um ícone ou cor (tag) dependendo do status
-                let tagStatus = '';
-                if(ag.status === 'concluido') tagStatus = '<span style="color: #10b981; font-size: 12px; font-weight: bold;">(CONCLUÍDO)</span>';
-                if(ag.status === 'cancelado') tagStatus = '<span style="color: #ef4444; font-size: 12px; font-weight: bold;">(CANCELADO)</span>';
-
                 card.innerHTML = `
                     <div class="card-info">
-                        <h3>${ag.nome} ${tagStatus}</h3>
+                        <!-- NOME E BADGE LADO A LADO -->
+                        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                            <h3 style="margin: 0;">${ag.nome}</h3>
+                            ${badgeHTML}
+                        </div>
                         <p><i class="ph ph-phone"></i> ${telefoneTexto}</p>
                         <p><i class="ph ph-calendar-blank"></i> ${dataBR}</p>
                         <p><i class="ph ph-clock"></i> ${horaFormatada}</p>
                     </div>
                     
-                    <!-- Os botões. Se já estiver concluído/cancelado, podemos esconder ou alterar -->
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
                         ${ag.status === 'pendente' ? `<button class="btn-selecionar-barbearia" onclick="atualizarStatus(${ag.id}, 'concluido')" style="flex: 1; background-color: var(--secondary-color); color: var(--dark-color);">Concluir</button>` : ''}
                         <button class="btn-selecionar-barbearia" onclick="excluirAgendamento(${ag.id})" style="flex: 1; background-color: #ffeaea; color: #d63031;">Excluir</button>

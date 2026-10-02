@@ -7,6 +7,8 @@
     
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Adicione isto na secção <head> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
@@ -61,7 +63,7 @@
                 <!-- Filtro de Data -->
                 <div class="input-wrapper" style="flex: 1; min-width: 200px; margin: 0;">
                     <i class="ph ph-calendar-blank"></i>
-                    <input type="date" id="filtro-data" title="Filtrar por data" style="padding-left: 40px; border-radius: 8px; border: 1px solid #ccc; width: 100%; font-family: 'Poppins';">
+                    <input type="text" id="filtro-data" placeholder="Filtrar por data...">
                 </div>
                 
                 <!-- Filtro de Status -->
@@ -135,6 +137,9 @@
 
     </main>
 
+    <!-- Adicione os scripts do Flatpickr aqui no final -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="../src/js/pagina_inicial.js"></script>
 </body>
 </html>
