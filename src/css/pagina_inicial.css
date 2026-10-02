@@ -333,3 +333,15 @@ nav a.ativo, nav a:hover {
     color: #64748b;
     pointer-events: none; /* Permite que o cliente clique "através" do ícone */
 }
+
+/* ==========================================
+   ESTILIZAÇÃO DOS DIAS BLOQUEADOS NO FLATPICKR
+   ========================================== */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #f70404 !important;             /* Texto avermelhado */
+    background-color: #ff7777 !important;    /* Fundo ligeiramente avermelhado */
+    text-decoration: line-through;           /* Faz um risco no meio do número */
+    cursor: not-allowed !important;          /* Muda o cursor do rato para proibido 🚫 */
+    opacity: 0.7;                            /* Deixa o botão um pouco transparente */
+}

@@ -51,23 +51,48 @@ const MEU_ID_BARBEIRO = 1;
 const inputFiltroData = document.getElementById('filtro-data');
 const inputFiltroStatus = document.getElementById('filtro-status');
 
-// Assim que a página abre...
-document.addEventListener('DOMContentLoaded', () => {
+// Variável para guardar os dias que o barbeiro trabalha
+let diasTrabalhoBarbeiro = [];
+
+// Assim que a página abre... (Agora é async!)
+document.addEventListener('DOMContentLoaded', async () => {
     
-    // 1. Inicializa o Flatpickr bonito no filtro de data!
+    // 1. BUSCAR A DISPONIBILIDADE ANTES DE MONTAR O CALENDÁRIO
+    try {
+        const respostaDisp = await fetch(`${BASE_URL}/api/barbeiros/${MEU_ID_BARBEIRO}/disponibilidade`);
+        const dadosDisp = await respostaDisp.json();
+
+        if (dadosDisp.sucesso) {
+            // Guardamos os dias na nossa lista (ex: [1, 2, 3, 4, 5])
+            diasTrabalhoBarbeiro = dadosDisp.disponibilidade.map(item => Number(item.dia_semana));
+        }
+    } catch (erro) {
+        console.error("Erro ao buscar disponibilidade:", erro);
+    }
+
+    // 2. INICIALIZA O FLATPICKR JÁ COM OS BLOQUEIOS
     flatpickr(inputFiltroData, {
-        minDate: "today",       // Só permite filtrar de hoje em diante
+        minDate: "today",       
         locale: "pt",
-        dateFormat: "Y-m-d",    // O formato que o Python entende
+        dateFormat: "Y-m-d",    
         altInput: true,
-        altFormat: "d/m/Y",     // O formato brasileiro (ex: 02/10/2026)
+        altFormat: "d/m/Y",     
+        disable: [
+            function(dataDoCalendario) {
+                // Se a lista estiver vazia (erro na rede), não bloqueia nada para não travar
+                if (diasTrabalhoBarbeiro.length === 0) return false; 
+                
+                const dia = dataDoCalendario.getDay();
+                // Bloqueia (return true) se o dia NÃO estiver na lista de dias de trabalho
+                return !diasTrabalhoBarbeiro.includes(dia);
+            }
+        ],
         onChange: function() {
-            // Quando a data muda no Flatpickr, recarrega a agenda!
-            carregarMinhaAgenda();
+            carregarMinhaAgenda(); // Recarrega os cartões quando muda a data
         }
     });
 
-    // Carrega a agenda pela primeira vez
+    // 3. Carrega a agenda pela primeira vez
     carregarMinhaAgenda();
 });
 
