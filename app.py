@@ -334,7 +334,7 @@ def listar_barbeiros():
 # ROTA 7: BUSCAR DISPONIBILIDADE DO BARBEIRO
 # ==============================================================
 @app.route('/api/barbeiros/<int:barbeiro_id>/disponibilidade', methods=["GET"])
-def busccar_disponibilidade(barbeiro_id):
+def buscar_disponibilidade(barbeiro_id):
     try:
         conexao = psycopg2.connect(db_url)
         cursor = conexao.cursor()
@@ -494,6 +494,123 @@ def criar_agendamento():
         return jsonify({"sucesso": False, "mensagem": "Erro interno ao tentar salvar o agendamento."}), 500
 
     
+# ==============================================================
+# ROTA 10: LISTAR AGENDAMENTOS DO BARBEIRO (COM FILTROS)
+# ==============================================================
+@app.route('/api/barbeiros/<int:barbeiro_id>/agendamentos', methods=['GET'])
+def listar_agendamentos_barbeiro(barbeiro_id):
+    # Lemos os filtros enviados pela URL pelo JavaScript
+    filtro_data = request.args.get('data') 
+    filtro_status = request.args.get('status')
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # Começamos a montar o comando SQL e a lista de valores
+        comando_sql = """
+            SELECT id, nome_cliente, telefone_cliente, data_agendamento, hora_agendamento, status
+            FROM agendamentos
+            WHERE barbeiro_id = %s
+        """
+        valores = [barbeiro_id]
+
+        # 1. Aplicar filtro de DATA
+        if filtro_data:
+            comando_sql += " AND data_agendamento = %s"
+            valores.append(filtro_data)
+        else:
+            # Se não enviar data, por padrão busca de hoje para a frente
+            comando_sql += " AND data_agendamento >= CURRENT_DATE"
+
+        # 2. Aplicar filtro de STATUS
+        if filtro_status and filtro_status != 'todos':
+            comando_sql += " AND status = %s"
+            valores.append(filtro_status)
+        else:
+            # Se for 'todos', trazemos pendentes e concluídos (ocultamos cancelados por padrão)
+            comando_sql += " AND status != 'cancelado'"
+
+        # Finaliza o comando com a ordenação
+        comando_sql += " ORDER BY data_agendamento ASC, hora_agendamento ASC;"
+
+        # Executamos usando a lista de valores (transformada em tupla)
+        cursor.execute(comando_sql, tuple(valores))
+        registros = cursor.fetchall()
+        
+        cursor.close()
+        conexao.close()
+
+        agendamentos = []
+        if registros:
+            for reg in registros:
+                agendamentos.append({
+                    "id": reg[0],
+                    "nome": reg[1],
+                    "telefone": reg[2],
+                    "data": str(reg[3]),
+                    "hora": str(reg[4]),
+                    "status": reg[5]
+                })
+
+        return jsonify({"sucesso": True, "agendamentos": agendamentos}), 200
+
+    except Exception as erro:
+        print(f"ERRO AO LISTAR AGENDAMENTOS: {erro}")
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+
+# ==============================================================
+# ROTA 11: ATUALIZAR STATUS DO AGENDAMENTO (Ex: Concluir)
+# ==============================================================
+@app.route('/api/agendamentos/<int:agendamento_id>/status', methods=['PATCH'])
+def atualizar_status_agendamento(agendamento_id):
+    dados = request.get_json()
+    novo_status = dados.get('status') # O JavaScript vai enviar 'concluido' ou 'cancelado'
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # Atualiza apenas a coluna status do agendamento específico
+        cursor.execute("""
+            UPDATE agendamentos 
+            SET status = %s 
+            WHERE id = %s
+        """, (novo_status, agendamento_id))
+
+        conexao.commit() # Salva a alteração
+        cursor.close()
+        conexao.close()
+
+        return jsonify({"sucesso": True, "mensagem": "Status atualizado com sucesso!"}), 200
+
+    except Exception as erro:
+        print("ERRO AO ATUALIZAR STATUS:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro ao atualizar status."}), 500
+
+
+# ==============================================================
+# ROTA 12: EXCLUIR AGENDAMENTO
+# ==============================================================
+@app.route('/api/agendamentos/<int:agendamento_id>', methods=['DELETE'])
+def excluir_agendamento(agendamento_id):
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # Apaga a linha inteira da tabela de agendamentos
+        cursor.execute("DELETE FROM agendamentos WHERE id = %s", (agendamento_id,))
+
+        conexao.commit() # Salva a alteração
+        cursor.close()
+        conexao.close()
+
+        return jsonify({"sucesso": True, "mensagem": "Agendamento excluído com sucesso!"}), 200
+
+    except Exception as erro:
+        print("ERRO AO EXCLUIR AGENDAMENTO:", erro)
+        return jsonify({"sucesso": False, "mensagem": "Erro ao excluir agendamento."}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

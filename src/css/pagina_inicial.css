@@ -105,20 +105,23 @@ nav a.ativo, nav a:hover {
 
 /* Container que segura os cartões */
 .cards-container {
-    display: grid;
-    grid-template-columns: 1fr; /* 1 coluna no telemóvel */
-    gap: 15px; /* Espaço entre os cartões */
+    display: flex;
+    flex-direction: column; /* Garante que ficam sempre um debaixo do outro */
+    gap: 15px;
+    width: 100%;
 }
 
 /* O aspeto do Cartão da Barbearia */
 .card-barbearia {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: column; /* Em telemóveis, os itens ficam em coluna */
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: 0.3s;
 }
 
 .card-info h3 {
@@ -238,5 +241,23 @@ nav a.ativo, nav a:hover {
 
     .cards-container {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Cria várias colunas automaticamente */
+    }
+
+    .card-barbearia {
+        flex-direction: row; /* Fica retangular, lado a lado! */
+        align-items: center; /* Centraliza a informação com os botões */
+    }
+    
+    .card-barbearia .card-info {
+        display: flex;
+        gap: 20px; /* Coloca os dados do cliente lado a lado */
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .card-barbearia > div:last-child { /* A div dos botões */
+        margin-top: 0 !important;
+        min-width: 250px;
+        justify-content: flex-end;
     }
 }
