@@ -345,3 +345,46 @@ nav a.ativo, nav a:hover {
     cursor: not-allowed !important;          /* Muda o cursor do rato para proibido 🚫 */
     opacity: 0.7;                            /* Deixa o botão um pouco transparente */
 }
+
+/* ==========================================
+   COMPONENTE: JANELA MODAL (FLUTUANTE)
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6); /* Fundo escuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    animation: deslizarCima 0.3s ease-out;
+}
+
+@keyframes deslizarCima {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 { font-size: 20px; color: var(--primary-color); }
+
+.btn-fechar {
+    background: none; border: none; font-size: 28px;
+    color: #94a3b8; cursor: pointer;
+}
+.btn-fechar:hover { color: #ef4444; }
