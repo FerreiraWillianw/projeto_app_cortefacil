@@ -388,3 +388,89 @@ nav a.ativo, nav a:hover {
     color: #94a3b8; cursor: pointer;
 }
 .btn-fechar:hover { color: #ef4444; }
+
+/* ==========================================
+   ESTILOS DA ABA: MEU PERFIL (DISPONIBILIDADE OTIMIZADA)
+   ========================================== */
+.titulo-sessao-perfil {
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 5px;
+}
+
+/* Container dos botões de dia */
+.seletor-dias-semana {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap; /* Se a tela for muito pequena, os botões quebram para a linha de baixo */
+}
+
+/* O estilo base do "Chip" (Botão do dia) */
+.btn-dia-chip {
+    flex: 1;
+    min-width: 40px;
+    padding: 10px 5px;
+    border: 2px solid #e2e8f0;
+    background-color: #f8fafc;
+    color: #64748b;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Como o botão fica quando o barbeiro clica nele (Ativado) */
+.btn-dia-chip.ativo {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* O estilo da linha de horário que será injetada pelo JavaScript */
+.linha-horario-dinamico {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    animation: aparecer 0.3s ease-out;
+}
+
+/* Animação para os campos não aparecerem de forma brusca */
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nome-dia-dinamico {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #334155;
+    min-width: 100px;
+}
+
+.controles-hora-dinamico {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Inputs de hora gerados dinamicamente */
+.controles-hora-dinamico input[type="time"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    outline: none;
+}
+.controles-hora-dinamico input[type="time"]:focus {
+    border-color: var(--primary-color);
+}

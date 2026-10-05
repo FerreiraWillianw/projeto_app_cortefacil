@@ -200,6 +200,7 @@ if (btnAbrirModal) {
         modalAgendamento.style.display = 'flex';
 
         // Reseta o campo de hora sempre que o modal abre
+        document.getElementById('manual-data').value = '';
         document.getElementById('manual-hora').innerHTML = '<option value="" disabled selected>Escolha uma data primeiro...</option>';
         document.getElementById('manual-hora').disabled = true;
 
@@ -214,6 +215,7 @@ if (btnAbrirModal) {
     btnFecharModal.addEventListener('click', () => {
         modalAgendamento.style.display = 'none';
         formAgendamento.reset();
+        
     });
 
     // 3. SALVAR NOVO AGENDAMENTO
@@ -221,7 +223,7 @@ if (btnAbrirModal) {
         evento.preventDefault();
 
         const nome = document.getElementById("manual-nome").value;
-        const telefone = document.getElementById("manual-telefon").value;
+        const telefone = document.getElementById("manual-telefone").value;
         const data = document.getElementById("manual-data").value;
         const hora = document.getElementById("manual-hora").value;
 
