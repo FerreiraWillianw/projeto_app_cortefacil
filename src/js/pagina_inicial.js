@@ -2,16 +2,27 @@
 // VERIFICAÇÃO DE SEGURANÇA (O CRACHÁ)
 // ==========================================
 
-// 1. Tentamos procurar o crachá 'barbeiro_logado' na memória do navegador
+// 1. Procuramos o crachá 'barbeiro_logado' na memória
 const crachaTexto = localStorage.getItem('barbeiro_logado');
 
-// 2. Se o texto não existir (for null), significa que ele não fez login
+// 2. Se não existir, expulsa imediatamente!
 if (!crachaTexto) {
-    alert("⛔ Acesso negado! Por favor, faça o login primeiro.")
+    alert("⛔ Acesso negado! Por favor, faça o login primeiro.");
     window.location.href = 'login.html';
-} else {
-    const barbeiro = JSON.parse(crachaTexto)
 }
+
+// 3. Se o código chegou aqui, é porque ele tem o crachá. 
+// Transformamos o texto num objeto real do JavaScript.
+const barbeiroLogado = JSON.parse(crachaTexto);
+
+
+// ==========================================
+// CONFIGURAÇÕES GERAIS E INTEGRAÇÃO (PYTHON)
+// ==========================================
+const BASE_URL = 'http://127.0.0.1:5000';
+
+// 4. A MÁGICA: Agora usamos o ID real de quem fez login!
+const ID_BARBEIRO = barbeiroLogado.id;
 
 
 // ==========================================
@@ -42,12 +53,6 @@ if (btnSair) {
     })
 }
 
-// ==========================================
-// INTEGRAÇÃO COM O BACKEND (PYTHON) E FILTROS
-// ==========================================
-const BASE_URL = 'http://127.0.0.1:5000';
-const MEU_ID_BARBEIRO = 1; 
-
 const inputFiltroData = document.getElementById('filtro-data');
 const inputFiltroStatus = document.getElementById('filtro-status');
 
@@ -59,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // 1. BUSCAR A DISPONIBILIDADE ANTES DE MONTAR O CALENDÁRIO
     try {
-        const respostaDisp = await fetch(`${BASE_URL}/api/barbeiros/${MEU_ID_BARBEIRO}/disponibilidade`);
+        const respostaDisp = await fetch(`${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/disponibilidade`);
         const dadosDisp = await respostaDisp.json();
 
         if (dadosDisp.sucesso) {
@@ -70,27 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Erro ao buscar disponibilidade:", erro);
     }
 
-    // 2. INICIALIZA O FLATPICKR JÁ COM OS BLOQUEIOS
-    flatpickr(inputFiltroData, {
-        minDate: "today",       
-        locale: "pt",
-        dateFormat: "Y-m-d",    
-        altInput: true,
-        altFormat: "d/m/Y",     
-        disable: [
-            function(dataDoCalendario) {
-                // Se a lista estiver vazia (erro na rede), não bloqueia nada para não travar
-                if (diasTrabalhoBarbeiro.length === 0) return false; 
-                
-                const dia = dataDoCalendario.getDay();
-                // Bloqueia (return true) se o dia NÃO estiver na lista de dias de trabalho
-                return !diasTrabalhoBarbeiro.includes(dia);
-            }
-        ],
-        onChange: function() {
-            carregarMinhaAgenda(); // Recarrega os cartões quando muda a data
-        }
-    });
+    // ========================================================
+    // O QUE MUDOU AQUI: Usamos o nosso componente do outro arquivo!
+    // ========================================================
+    // 2. INICIALIZA O FILTRO DE DATA
+    criarComponenteData('filtro-data', diasTrabalhoBarbeiro);
 
     // 3. Carrega a agenda pela primeira vez
     carregarMinhaAgenda();
@@ -107,7 +96,7 @@ async function carregarMinhaAgenda() {
     const statusFiltrado = inputFiltroStatus.value;
 
     try {
-        let url = `${BASE_URL}/api/barbeiros/${MEU_ID_BARBEIRO}/agendamentos?status=${statusFiltrado}`;
+        let url = `${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/agendamentos?status=${statusFiltrado}`;
         if (dataFiltrada) {
             url += `&data=${dataFiltrada}`;
         }
@@ -193,4 +182,81 @@ async function excluirAgendamento(idAgendamento) {
         
         if (dados.sucesso) carregarMinhaAgenda(); // Recarrega a tela para o cartão sumir
     } catch (erro) { console.error("Erro ao excluir:", erro); }
+}
+
+// ==========================================
+// LÓGICA DO MODAL DE AGENDAMENTO MANUAL
+// ==========================================
+
+const modalAgendamento = document.getElementById('modal-agendamento');
+const btnAbrirModal = document.getElementById('btn-abrir-modal-agendamento');
+const btnFecharModal = document.getElementById('btn-fechar-modal');
+const formAgendamento = document.getElementById('form-agendamento-manual');
+
+// Se o botão de abrir existir na tela, configuramos os eventos
+if (btnAbrirModal) {
+    // 1. ABRIR MODAL
+    btnAbrirModal.addEventListener('click', () => {
+        modalAgendamento.style.display = 'flex';
+
+        // Reseta o campo de hora sempre que o modal abre
+        document.getElementById('manual-data').value = '';
+        document.getElementById('manual-hora').innerHTML = '<option value="" disabled selected>Escolha uma data primeiro...</option>';
+        document.getElementById('manual-hora').disabled = true;
+
+        // Chamamos o componente de Data...
+        // E dizemos a ele: "Quando mudarem a data, busca os horários livres!"
+        criarComponenteData('manual-data', diasTrabalhoBarbeiro, function(dataEscolhida) {
+            carregarHorariosDisponiveis(ID_BARBEIRO, dataEscolhida, 'manual-hora')
+        })
+    })
+
+    // 2. FECHAR MODAL
+    btnFecharModal.addEventListener('click', () => {
+        modalAgendamento.style.display = 'none';
+        formAgendamento.reset();
+        
+    });
+
+    // 3. SALVAR NOVO AGENDAMENTO
+    formAgendamento.addEventListener("submit", async function(evento) {
+        evento.preventDefault();
+
+        const nome = document.getElementById("manual-nome").value;
+        const telefone = document.getElementById("manual-telefone").value;
+        const data = document.getElementById("manual-data").value;
+        const hora = document.getElementById("manual-hora").value;
+
+        // Limpa a formatação do telefone para enviar só os números ao banco de dados
+        const telefoneLimpo = telefone.replace(/\D/g, '');
+
+        try {
+            // Reutilizamos a mesma rota que o cliente usa no site público!
+            const resposta = await fetch(BASE_URL + '/api/agendar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: nome,
+                    telefone, telefoneLimpo,
+                    barbeiro_id: ID_BARBEIRO,
+                    data: data,
+                    hora: hora
+                })
+            });
+
+            const dados = await resposta.json();
+
+            if (dados.sucesso) {
+                alert("✅ Agendamento marcado com sucesso!");
+                modalAgendamento.style.display = 'none'; // Esconde a janela
+                formAgendamento.reset(); // Limpa o formulário
+                carregarMinhaAgenda(); // Recarrega os cartões na hora!
+            } else {
+                alert("❌ Erro: " + dados.mensagem);
+            }
+        } catch (erro) {
+            console.error("Erro ao agendar:", erro);
+            alert("Erro ao comunicar com o servidor.");
+        }
+    });
 }

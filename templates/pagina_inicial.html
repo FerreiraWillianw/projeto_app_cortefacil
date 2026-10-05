@@ -31,9 +31,6 @@
                     <a href="#minha-agenda" class="ativo"><i class="ph ph-calendar-check"></i> Minha Agenda</a>
                 </li>
                 <li>
-                    <a href="#meus-servicos"><i class="ph ph-scissors"></i> Meus Serviços</a>
-                </li>
-                <li>
                     <a href="#perfil"><i class="ph ph-user"></i> Meu Perfil</a>
                 </li>
             </ul>
@@ -51,9 +48,15 @@
 
         <!-- ABA 1: MINHA AGENDA (Visível por padrão) -->
         <section id="secao-minha-agenda">
-            <header class="cabecalho-secao">
-                <h2>Minha Agenda</h2>
-                <p>Estes são os teus próximos clientes.</p>
+            <header class="cabecalho-secao" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2>Minha Agenda</h2>
+                    <p>Estes são os seus próximos clientes.</p>
+                </div>
+                <!-- Botão para abrir o Modal -->
+                <button id="btn-abrir-modal-agendamento" class="btn-selecionar-barbearia" style="width: auto; padding: 10px 20px;">
+                    + Novo Agendamento
+                </button>
             </header>
 
             <!-- ==========================================
@@ -84,62 +87,75 @@
             </div>
         </section>
 
-        <!-- ABA 2: MEUS SERVIÇOS (Escondida por padrão) -->
-        <section id="secao-meus-servicos" style="display: none;">
-            <header class="cabecalho-secao">
-                <h2>Meus Serviços</h2>
-                <p>Gere os cortes e preços que ofereces.</p>
-            </header>
-            <button class="btn-selecionar-barbearia" style="margin-bottom: 20px;">+ Adicionar Serviço</button>
-            
-            <div class="cards-container">
-                <div class="card-barbearia">
-                    <div class="card-info">
-                        <h3>Corte Clássico</h3>
-                        <p>R$ 35,00 • 30 minutos</p>
-                    </div>
-                    <!-- Botões de ação rápida para o barbeiro -->
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="btn-selecionar-barbearia" style="flex: 1; background-color: #eee; color: #333;">Editar</button>
-                        <button class="btn-selecionar-barbearia" style="flex: 1; background-color: #ffeaea; color: #d63031;">Excluir</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- SEÇÃO 2: DISPONIBILIDADE (DIAS E HORÁRIOS OTIMIZADOS) -->
+        <h3 class="titulo-sessao-perfil" style="margin-top: 30px;">Horário de Funcionamento</h3>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Toque nos dias para definir o horário de trabalho.</p>
 
-        <!-- ABA 3: MEU PERFIL (Escondida por padrão) -->
-        <section id="secao-perfil" style="display: none;">
-            <header class="cabecalho-secao">
-                <h2>Meu Perfil</h2>
-                <p>Mantenha os dados da sua barbearia atualizados.</p>
-            </header>
+        <div class="seletor-dias-semana" id="seletor-dias">
+            <!-- Usamos data-dia para identificar o número do dia (Domingo = 0, Segunda = 1...) -->
+            <button type="button" class="btn-dia-chip" data-dia="0">Dom</button>
+            <button type="button" class="btn-dia-chip" data-dia="1">Seg</button>
+            <button type="button" class="btn-dia-chip" data-dia="2">Ter</button>
+            <button type="button" class="btn-dia-chip" data-dia="3">Qua</button>
+            <button type="button" class="btn-dia-chip" data-dia="4">Qui</button>
+            <button type="button" class="btn-dia-chip" data-dia="5">Sex</button>
+            <button type="button" class="btn-dia-chip" data-dia="6">Sáb</button>
+        </div>
 
-            <form id="form-perfil" class="formulario-padrao">
-                <div class="input-wrapper">
-                    <i class="ph ph-user"></i>
-                    <input type="text" id="nome-perfil" value="João Barbeiro" required>
-                </div>
+        <!-- O recipiente vazio onde o JavaScript vai injetar os campos de hora -->
+        <div id="container-horarios-dinamicos" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <!-- Os campos aparecerão aqui -->
+        </div>
 
-                <div class="input-wrapper">
-                    <i class="ph ph-phone"></i>
-                    <input type="tel" id="telefone-perfil" value="(24) 99999-9999" required>
-                </div>
-
-                <!-- Como o barbeiro tem login, faz sentido ele poder alterar o e-mail aqui -->
-                <div class="input-wrapper">
-                    <i class="ph ph-envelope"></i>
-                    <input type="email" id="email-perfil" value="joao@cortefacil.com" required>
+        <button type="submit" class="btn-selecionar-barbearia" style="margin-top: 25px; width: 100%;">
+            Salvar Perfil e Horários
+        </button>
+        <!-- ==========================================
+             MODAL DE AGENDAMENTO MANUAL
+             ========================================== -->
+        <div id="modal-agendamento" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Agendar Cliente</h3>
+                    <button id="btn-fechar-modal" class="btn-fechar">&times;</button>
                 </div>
                 
-                <button type="submit" class="btn-selecionar-barbearia">Salvar Alterações</button>
-            </form>
-        </section>
+                <form id="form-agendamento-manual" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="input-wrapper">
+                        <i class="ph ph-user"></i>
+                        <input type="text" id="manual-nome" placeholder="Nome do Cliente" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="ph ph-phone"></i>
+                        <!-- Como pediu, todos obrigatórios (required) -->
+                        <input type="tel" id="manual-telefone" placeholder="Telefone do Cliente" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="ph ph-calendar-blank"></i>
+                        <input type="text" id="manual-data" placeholder="Escolha a data" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="ph ph-clock"></i>
+                        <!-- Trocamos o input pelo select para receber as opções do Python -->
+                        <select id="manual-hora" required disabled style="padding-left: 40px; border-radius: 8px; border: 1px solid #ccc; width: 100%; font-family: 'Poppins'; background-color: white;">
+                            <option value="" disabled selected>Escolha uma data primeiro...</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-selecionar-barbearia" style="width: 100%; margin-top: 10px;">
+                        Confirmar Horário
+                    </button>
+                </form>
+            </div>
+        </div>
 
     </main>
 
     <!-- Adicione os scripts do Flatpickr aqui no final -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="../src/js/components/components.js"></script>
+    <script src="../src/js/components/formatador_telefone.js"></script>
     <script src="../src/js/pagina_inicial.js"></script>
 </body>
 </html>
