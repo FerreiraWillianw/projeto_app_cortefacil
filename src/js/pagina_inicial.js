@@ -416,5 +416,71 @@ async function carregarMeuPerfil() {
     } catch (erro) {
         console.error("Erro ao carregar os dados do perfil:", erro)
     }
+};
+
+
+// ==========================================
+// SALVAR APENAS A DISPONIBILIDADE (HORÁRIOS)
+// ==========================================
+const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
+
+if (btnSalvarPerfil) {
+    btnSalvarPerfil.addEventListener('click', async function() {
+        
+        // 1. Coletamos APENAS os dias que estão selecionados no <select>
+        const opcoesSelecionadas = Array.from(selectDiasTrabalho.selectedOptions).map(opcao => opcao.value);
+        const novaDisponibilidade = [];
+
+        // 2. Verificamos os horários de cada dia selecionado
+        for (let dia of opcoesSelecionadas) {
+            const inicio = document.getElementById(`inicio-dia-${dia}`).value;
+            const fim = document.getElementById(`fim-dia-${dia}`).value;
+
+            // Validação: Se marcou o dia, é obrigatório colocar a hora
+            if (!inicio || !fim) {
+                const nomeDoDia = nomesDosDias[dia];
+                alert(`⚠️ Atenção: Preencha o horário de início e fim para ${nomeDoDia}, ou desmarque este dia.`);
+                return; // O 'return' cancela a gravação e para o código aqui
+            }
+
+            // Guardamos os dados validados na nossa lista
+            novaDisponibilidade.push({
+                dia_semana: dia,
+                hora_inicio: inicio,
+                hora_fim: fim
+            });
+        }
+
+        // 3. Mudamos o botão para dar feedback visual
+        const textoOriginal = btnSalvarPerfil.textContent;
+        btnSalvarPerfil.textContent = 'A guardar os horários...';
+        btnSalvarPerfil.disabled = true;
+
+        try {
+            // 4. Enviamos o pacote APENAS com a lista de disponibilidade para o Python
+            const resposta = await fetch(`${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/perfil`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    disponibilidade: novaDisponibilidade
+                })
+            });
+
+            const dados = await resposta.json();
+
+            if (dados.sucesso) {
+                alert("✅ Horários atualizados com sucesso!");
+            } else {
+                alert("❌ Erro ao guardar: " + dados.mensagem);
+            }
+        } catch (erro) {
+            console.error("Erro ao salvar horários:", erro);
+            alert("Erro de comunicação com o servidor.");
+        } finally {
+            // Restaura o botão ao normal, independentemente de dar erro ou sucesso
+            btnSalvarPerfil.textContent = textoOriginal;
+            btnSalvarPerfil.disabled = false;
+        }
+    });
 }
 
