@@ -86,30 +86,64 @@
                 <p style="text-align: center; color: #666;">A carregar a tua agenda...</p>
             </div>
         </section>
+        
 
-        <!-- SEÇÃO 2: DISPONIBILIDADE (DIAS E HORÁRIOS OTIMIZADOS) -->
-        <h3 class="titulo-sessao-perfil" style="margin-top: 30px;">Horário de Funcionamento</h3>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Toque nos dias para definir o horário de trabalho.</p>
+        <!-- ==========================================
+             ABA 2: MEU PERFIL (Escondido por padrão)
+             ========================================== -->
+        <section id="secao-perfil" style="display: none;">
+            <header class="cabecalho-secao">
+                <h2>Meu Perfil</h2>
+                <p>Altere os dados da sua barbearia e os seus horários de trabalho</p>
+            </header>
 
-        <div class="seletor-dias-semana" id="seletor-dias">
-            <!-- Usamos data-dia para identificar o número do dia (Domingo = 0, Segunda = 1...) -->
-            <button type="button" class="btn-dia-chip" data-dia="0">Dom</button>
-            <button type="button" class="btn-dia-chip" data-dia="1">Seg</button>
-            <button type="button" class="btn-dia-chip" data-dia="2">Ter</button>
-            <button type="button" class="btn-dia-chip" data-dia="3">Qua</button>
-            <button type="button" class="btn-dia-chip" data-dia="4">Qui</button>
-            <button type="button" class="btn-dia-chip" data-dia="5">Sex</button>
-            <button type="button" class="btn-dia-chip" data-dia="6">Sáb</button>
-        </div>
+            <form id="form-perfil" class="formulario-padrao">
+                <section id="dados-basicos" style="display: nome;">
+                    <!-- SEÇÃO 1: DADOS BÁSICOS -->
+                    <h3 class="titulo-sessao-perfil">Dados Básicos</h3>
+                    <div class="input-wrapper">
+                        <i class="ph ph-storefront"></i>
+                        <input type="text" id="nome-perfil" placeholder="Nome do Barbeiro ou Barbearia" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="ph ph-phone"></i>
+                        <input type="tel" id="telefone-perfil" placeholder="Telefone de contacto" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="ph ph-envelope"></i>
+                        <input type="email" id="email-perfil" placeholder="E-mail de acesso" required disabled title="O e-mail não pode ser alterado por aqui no momento">
+                    </div>
 
-        <!-- O recipiente vazio onde o JavaScript vai injetar os campos de hora -->
-        <div id="container-horarios-dinamicos" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <!-- Os campos aparecerão aqui -->
-        </div>
+                </section>
 
-        <button type="submit" class="btn-selecionar-barbearia" style="margin-top: 25px; width: 100%;">
-            Salvar Perfil e Horários
-        </button>
+                <!-- SEÇÃO 2: DISPONIBILIDADE (SELECT MÚLTIPLO) -->
+                <h3 class="titulo-sessao-perfil" style="margin-top: 30px;">Horários de Funcionamento</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Clique nos dias em que trabalha para ligar ou desligar.</p>
+                
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="ph ph-calendar" style="top: 20px;"></i>
+                    <select id="select-dias-trabalho" multiple size="7" style="padding: 10px 10px 10px 40px; border-radius: 8px; border: 1px solid #ccc; width: 100%; font-family: 'Poppins'; background-color: white; overflow: hidden; cursor: pointer;">
+                        <option value="0" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Domingo</option>
+                        <option value="1" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Segunda-feira</option>
+                        <option value="2" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Terça-feira</option>
+                        <option value="3" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Quarta-feira</option>
+                        <option value="4" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Quinta-feira</option>
+                        <option value="5" style="padding: 8px; border-bottom: 1px solid #f1f5f9;">Sexta-feira</option>
+                        <option value="6" style="padding: 8px;">Sábado</option>
+                    </select>
+                </div>
+
+                <div id="container-horarios-dinamicos" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Os campos aparecerão aqui magicamente -->
+                </div>
+
+                <button type="button" id="btn-salvar-perfil" class="btn-selecionar-barbearia" style="margin-top: 25px; width: 100%;">
+                    Salvar Perfil e Horários
+                </button>
+            </form>
+        </section>
+        
+        
         <!-- ==========================================
              MODAL DE AGENDAMENTO MANUAL
              ========================================== -->

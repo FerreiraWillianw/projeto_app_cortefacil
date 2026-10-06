@@ -34,6 +34,41 @@ function fazerLogout() {
     window.location.href = 'login.html';
 }
 
+// ==========================================
+// NAVEGAÇÃO DO MENU LATERAL (SISTEMA DE ABAS)
+// ==========================================
+// 1. Capturamos todos os links do menu e todas as seções (abas) da página
+const linksMenu = document.querySelectorAll('#sidebar nav ul li a');
+const secoes = document.querySelectorAll('#conteudo-principal section');
+
+// 2. Para cada link do menu, adicionamos um "ouvinte" de cliques
+linksMenu.forEach(link => {
+    link.addEventListener('click', function(evento) {
+
+        // Evita que a página recarregue ou dê um pulo para o topo
+        evento.preventDefault();
+
+        // Passo A: Esconde todas as abas da tela
+        secoes.forEach(secao => secao.style.display = 'none');
+
+        // Passo B: Remove a cor de destaque de todos os botões do menu
+        linksMenu.forEach(l => l.classList.remove('ativo'));
+
+        // Passo C: Coloca a cor de destaque APENAS no botão que acabou de ser clicado
+        this.classList.add('ativo');
+
+        // Passo D: Descobre qual aba abrir
+        // O this.getAttribute('href') pega o "#perfil" e o replace transforma em "secao-perfil"
+        const idAlvo = this.getAttribute('href').replace('#', 'secao-');
+
+        // Passo E:
+        const secaoAlvo = document.getElementById(idAlvo);
+        if (secaoAlvo) {
+            secaoAlvo.style.display = 'block';
+        }
+    });
+});
+
 
 // ==========================================
 // BOTÃO DE SAIR (LOGOUT SEGURO)
@@ -83,6 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Carrega a agenda pela primeira vez
     carregarMinhaAgenda();
+
+    carregarMeuPerfil();
 });
 
 // Se o barbeiro mudar o status no select, recarrega a lista
@@ -260,3 +297,104 @@ if (btnAbrirModal) {
         }
     });
 }
+
+// ==========================================
+// LÓGICA DA ABA: MEU PERFIL (SELECT MÚLTIPLO E HORÁRIOS)
+// ==========================================
+
+const selectDiasTrabalho = document.getElementById('select-dias-trabalho');
+const containerHorarios = document.getElementById('container-horarios-dinamicos');
+
+const nomesDosDias = {
+    0: 'Domingo',
+    1: 'Segunda-feira',
+    2: 'Terça-feira',
+    3: 'Quarta-feira',
+    4: 'Quinta-feira',
+    5: 'Sexta-feira',
+    6: 'Sábado'
+}
+
+// 1. EVENTO QUE GERA OS CAMPOS QUANDO O BARBEIRO SELECIONAR OS DIAS
+selectDiasTrabalho.addEventListener('change', function() {
+    // Pega todos os valores (0 a 6) que estão selecionados do <select>
+    const opcoesSelecionadas = Array.from(this.selectedOptions).map(opcao => opcao.value);
+
+    // Vamos passar por todos os 7 dias (0 a 6) para ver se devemos mostrar ou esconder
+    for (let i= 0; i <= 6; i++) {
+        const diaId = String(i);
+        const linhaExiste = document.getElementById(`linha-dia-${diaId}`);
+
+        // Se o dia estiver selecionado no <select>...
+        if (opcoesSelecionadas.includes(diaId)) {
+            // E a linha de horários ainda não existir na tela, nós criamos!
+            if (!linhaExiste) {
+                const linhaHorario = document.createElement('div');
+                linhaHorario.classList.add('linha-horario-dinamico');
+                linhaHorario.id = `linha-dia-${diaId}`;
+
+                linhaHorario.innerHTML = `
+                    <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
+                    <div class="controles-hora-dinamico">
+                        <input type="time" id="inicio-dia-${diaId}" required>
+                        <span>às</span>
+                        <input type="time" id="fim-dia-${diaId}" required>
+                    </div>
+                `;
+                containerHorarios.appendChild(linhaHorario);
+            }
+        }
+
+        // Se o dia NÃO estiver selecionado no <select>...
+        else {
+            // E a linha existir na tela, nós apagamos!
+            if (linhaExiste) {
+                linhaExiste.remove();
+            }
+        }
+    }
+});
+
+// 2. FUNÇÃO QUE CARREGA OS DADOS DO BANCO AO ABRIR O PERFIL
+async function carregarMeuPerfil() {
+    try {
+        // Aproveitamos a rota que já criamos para a "Agenda"
+        const resposta = await fetch(`${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/disponibilidade`);
+        const dados = await resposta.json();
+
+        if (dados.sucesso) {
+            const disponibilidadeSalva = dados.disponibilidade;
+
+            // Passo A: extrair apenas os números dos dias que vieram do banco
+            const diasParaSelecionar = disponibilidadeSalva.map(item => String(item.dia_semana));
+
+            // Passo B: Percorrer as opções do <select> e marcar como "selected" as que vieram do banco
+            Array.from(selectDiasTrabalho.options).forEach(opcao => {
+                if(diasParaSelecionar.includes(opcao.value)) {
+                    opcao.selected = true;
+                } else {
+                    opcao.selected = false;
+                }
+            });
+
+            // Passo C: Disparar manualmente o evento 'change' para que o JavaScript desenhe as caixas de hora na tela
+            selectDiasTrabalho.dispatchEvent(new Event('change'));
+
+            // Passo D: Agora que as caixas foram desenhadas, preenchemos os valores lá dentro!
+            disponibilidadeSalva.forEach(item => {
+                const diaId = String(item.dia_semana);
+                const inputInicio = document.getElementById(`inicio-dia-${diaId}`);
+                const inputFim = document.getElementById(`fim-dia-${diaId}`);
+
+                if (inputInicio && inputFim) {
+                    // O slice(0, 5) corta os segundos do banco de dados ("09:00:00" e vira "09:00")
+                    inputInicio.value = item.hora_inicio.slice(0, 5)
+                    inputFim.value = item.hora_fim.slice(0, 5)
+                }
+            });
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar os dados do perfil:", erro)
+    }
+}
+
