@@ -315,45 +315,66 @@ const nomesDosDias = {
     6: 'Sábado'
 }
 
-// 1. EVENTO QUE GERA OS CAMPOS QUANDO O BARBEIRO SELECIONAR OS DIAS
-selectDiasTrabalho.addEventListener('change', function() {
-    // Pega todos os valores (0 a 6) que estão selecionados do <select>
-    const opcoesSelecionadas = Array.from(this.selectedOptions).map(opcao => opcao.value);
+if (selectDiasTrabalho) {
+    selectDiasTrabalho.addEventListener('mousedown', function(evento) {
+        // Bloqueia o comportamento padrão chato do navegador
+        evento.preventDefault(); 
+        
+        const opcaoClicada = evento.target;
+        
+        // Se o barbeiro clicou mesmo no texto do dia...
+        if (opcaoClicada.tagName === 'OPTION') {
+            // Liga se estiver desligado, ou desliga se estiver ligado!
+            opcaoClicada.selected = !opcaoClicada.selected;
+            
+            // Avisa o sistema para gerar ou esconder as caixas de horário
+            this.dispatchEvent(new Event('change'));
+        }
+    });
 
-    // Vamos passar por todos os 7 dias (0 a 6) para ver se devemos mostrar ou esconder
-    for (let i= 0; i <= 6; i++) {
-        const diaId = String(i);
-        const linhaExiste = document.getElementById(`linha-dia-${diaId}`);
+    // ---------------------------------------------------------
+    // RESOLUÇÃO DO PROBLEMA 2: Preservar os horários digitados
+    // ---------------------------------------------------------
+    selectDiasTrabalho.addEventListener('change', function() {
+        const opcoesSelecionadas = Array.from(this.selectedOptions).map(opcao => opcao.value);
 
-        // Se o dia estiver selecionado no <select>...
-        if (opcoesSelecionadas.includes(diaId)) {
-            // E a linha de horários ainda não existir na tela, nós criamos!
-            if (!linhaExiste) {
-                const linhaHorario = document.createElement('div');
-                linhaHorario.classList.add('linha-horario-dinamico');
-                linhaHorario.id = `linha-dia-${diaId}`;
+        for (let i = 0; i <= 6; i++) {
+            const diaId = String(i);
+            const linhaExiste = document.getElementById(`linha-dia-${diaId}`);
 
-                linhaHorario.innerHTML = `
-                    <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
-                    <div class="controles-hora-dinamico">
-                        <input type="time" id="inicio-dia-${diaId}" required>
-                        <span>às</span>
-                        <input type="time" id="fim-dia-${diaId}" required>
-                    </div>
-                `;
-                containerHorarios.appendChild(linhaHorario);
+            // SE O DIA ESTÁ SELECIONADO...
+            if (opcoesSelecionadas.includes(diaId)) {
+                if (!linhaExiste) {
+                    // Cenário A: Não existe na tela ainda. Criamos a caixinha do zero!
+                    const linhaHorario = document.createElement('div');
+                    linhaHorario.classList.add('linha-horario-dinamico'); 
+                    linhaHorario.id = `linha-dia-${diaId}`;
+                    
+                    linhaHorario.innerHTML = `
+                        <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
+                        <div class="controles-hora-dinamico">
+                            <input type="time" id="inicio-dia-${diaId}" required>
+                            <span>às</span>
+                            <input type="time" id="fim-dia-${diaId}" required>
+                        </div>
+                    `;
+                    containerHorarios.appendChild(linhaHorario);
+                } else {
+                    // Cenário B: A linha já existe (só estava escondida).
+                    // Mostramos de novo e os horários continuam lá intactos!
+                    linhaExiste.style.display = 'flex';
+                }
+            } 
+            // SE O DIA FOI DESMARCADO...
+            else {
+                if (linhaExiste) {
+                    // O SEGREDO: Em vez de 'linhaExiste.remove()', apenas escondemos!
+                    linhaExiste.style.display = 'none';
+                }
             }
         }
-
-        // Se o dia NÃO estiver selecionado no <select>...
-        else {
-            // E a linha existir na tela, nós apagamos!
-            if (linhaExiste) {
-                linhaExiste.remove();
-            }
-        }
-    }
-});
+    });
+}
 
 // 2. FUNÇÃO QUE CARREGA OS DADOS DO BANCO AO ABRIR O PERFIL
 async function carregarMeuPerfil() {
@@ -364,7 +385,6 @@ async function carregarMeuPerfil() {
 
         if (dados.sucesso) {
             const disponibilidadeSalva = dados.disponibilidade;
-
             // Passo A: extrair apenas os números dos dias que vieram do banco
             const diasParaSelecionar = disponibilidadeSalva.map(item => String(item.dia_semana));
 
