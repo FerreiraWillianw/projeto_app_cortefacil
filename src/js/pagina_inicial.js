@@ -127,7 +127,7 @@ inputFiltroStatus.addEventListener('change', carregarMinhaAgenda);
 
 async function carregarMinhaAgenda() {
     const listaAgendamentos = document.getElementById('lista-agendamentos');
-    listaAgendamentos.innerHTML = '<p style="text-align: center; color: #666;">A carregar a tua agenda...</p>';
+    listaAgendamentos.innerHTML = '<p style="text-align: center; color: #666;">Carregando agenda...</p>';
 
     const dataFiltrada = inputFiltroData.value;
     const statusFiltrado = inputFiltroStatus.value;
