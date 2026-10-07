@@ -565,3 +565,35 @@ nav a.ativo, nav a:hover {
     color: var(--primary-color, #1e293b);
     transition: color 0.3s ease;
 }
+
+/* ==========================================
+   RESPONSIVIDADE: ADAPTAÇÃO PARA CELULARES
+   ========================================== */
+
+/* Esta regra diz: "Só aplica este código se a tela tiver no máximo 500px de largura" */
+@media (max-width: 500px) {
+    
+    /* 1. Ajustamos a caixa principal da linha */
+    .linha-horario-dinamico {
+        padding: 10px; /* Reduzimos a 'gordura' externa para ganhar espaço */
+        flex-wrap: wrap; /* PLANO B: Se a tela for minúscula, permite que a hora vá para a linha de baixo */
+        gap: 5px; /* Espaço caso ocorra a quebra de linha */
+    }
+
+    /* 2. Aproximamos os campos de hora (trazemos para a esquerda) */
+    .controles-hora-dinamico {
+        gap: 5px; /* O espaço original era maior. Aqui juntamos o '08:00', o 'às' e o '18:00' */
+    }
+
+    /* 3. Emagrecemos as caixinhas de hora */
+    .controles-hora-dinamico input[type="time"] {
+        padding: 4px 6px; /* Diminui o espaço por dentro da borda */
+        font-size: 13px;  /* Reduz levemente o tamanho do número para caber melhor */
+    }
+
+    /* 4. Reduzimos levemente a fonte do dia da semana */
+    .nome-dia-dinamico {
+        font-size: 12px;
+        min-width: auto; /* Remove a largura mínima para o nome não empurrar as horas */
+    }
+}
