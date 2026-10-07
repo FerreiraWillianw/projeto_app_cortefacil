@@ -41,7 +41,7 @@ function criarComponenteData(idDoInput, diasDeTrabalho = [], aoMudarData = null)
 async function carregarHorariosDisponiveis(barbeiroId, dataSelecionada, idSelectHora) {
     const selectHora = document.getElementById(idSelectHora);
     
-    selectHora.innerHTML = '<option value="" disabled selected>A carregar horários...</option>';
+    selectHora.innerHTML = '<option value="" disabled selected>Carregando horários...</option>';
     selectHora.disabled = true;
 
     try {

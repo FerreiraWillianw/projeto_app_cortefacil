@@ -389,13 +389,20 @@ async function carregarMeuPerfil() {
             const diasParaSelecionar = disponibilidadeSalva.map(item => String(item.dia_semana));
 
             // Passo B: Percorrer as opções do <select> e marcar como "selected" as que vieram do banco
+            // Seleciona as opções corretas no Menu Escondido e Pinta a Capa Visual
             Array.from(selectDiasTrabalho.options).forEach(opcao => {
-                if(diasParaSelecionar.includes(opcao.value)) {
+                const itemVisual = document.querySelector(`.dropdown-item[data-valor="${opcao.value}"]`);
+                if (diasParaSelecionar.includes(opcao.value)) {
                     opcao.selected = true;
+                    if (itemVisual) itemVisual.classList.add('selecionado');
                 } else {
                     opcao.selected = false;
+                    if (itemVisual) itemVisual.classList.remove('selecionado');
                 }
             });
+            
+            // Atualiza a barra de texto (ex: "5 dias selecionados")
+            atualizarTextoDropdown();
 
             // Passo C: Disparar manualmente o evento 'change' para que o JavaScript desenhe as caixas de hora na tela
             selectDiasTrabalho.dispatchEvent(new Event('change'));
@@ -482,5 +489,70 @@ if (btnSalvarPerfil) {
             btnSalvarPerfil.disabled = false;
         }
     });
+}
+
+// =========================================================
+// O NOVO DROPDOWN CUSTOMIZADO (A CAPA VISUAL)
+// =========================================================
+const dropdownHeader = document.getElementById('dropdown-dias-header');
+const dropdownLista = document.getElementById('dropdown-dias-lista');
+const dropdownTexto = document.getElementById('dropdown-dias-texto');
+const itensDropdown = document.querySelectorAll('.dropdown-item');
+
+if (dropdownHeader) {
+    // 1. Clicar na barra abre ou fecha a lista flutuante
+    dropdownHeader.addEventListener('click', function(evento) {
+        evento.stopPropagation(); // Impede o clique de vazar para a página
+        const estaAberto = dropdownLista.style.display === 'block';
+        dropdownLista.style.display = estaAberto ? 'none' : 'block';
+    });
+
+    // 2. Fechar a lista de forma inteligente se o utilizador clicar noutro lugar da tela!
+    document.addEventListener('click', function(evento) {
+        if (!dropdownHeader.contains(evento.target) && !dropdownLista.contains(evento.target)) {
+            dropdownLista.style.display = 'none';
+        }
+    });
+
+    // 3. O que acontece quando clica num dia da lista
+    itensDropdown.forEach(item => {
+        item.addEventListener('click', function() {
+            const valorDia = this.getAttribute('data-valor');
+
+            // Inverte o visual (muda de cor / tira a cor)
+            this.classList.toggle('selecionado');
+
+            // Comunica-se com o "Cérebro Escondido" (o Select antigo)
+            const opcaoEscondida = Array.from(selectDiasTrabalho.options).find(opt => opt.value === valorDia);
+            if (opcaoEscondida) {
+                opcaoEscondida.selected = this.classList.contains('selecionado');
+            }
+
+            // Atualiza o texto bonitinho ("2 dias selecionados", etc.)
+            atualizarTextoDropdown();
+
+            // Grita para o resto do sistema que houve uma mudança para desenhar as caixas de horas!
+            selectDiasTrabalho.dispatchEvent(new Event('change'));
+        });
+    });
+}
+
+// Função auxiliar para mudar o texto da barra dependendo de quantos dias escolheu
+function atualizarTextoDropdown() {
+    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
+
+    if (selecionados.length === 0) {
+        // 1. Cenário Vazio: Texto padrão e removemos o estilo de destaque
+        dropdownTexto.textContent = "Selecione os dias...";
+        dropdownTexto.classList.remove('texto-ativo');
+    } else if (selecionados.length === 1) {
+        // 2. Cenário 1 Dia: Mostra o nome do dia e adiciona o estilo de destaque
+        dropdownTexto.textContent = selecionados[0].textContent;
+        dropdownTexto.classList.add('texto-ativo');
+    } else {
+        // 3. Cenário Vários Dias: Mostra a contagem e adiciona o estilo de destque
+        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
+        dropdownTexto.classList.add('texto-ativo');
+    }
 }
 
