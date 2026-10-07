@@ -462,17 +462,27 @@ nav a.ativo, nav a:hover {
     gap: 10px;
 }
 
-/* Inputs de hora gerados dinamicamente */
-.controles-hora-dinamico input[type="time"] {
-    padding: 8px;
+/* ==========================================
+   ESTILIZAÇÃO DOS INPUTS DE TEXTO (AS CAIXAS DE HORA)
+   ========================================== */
+.controles-hora-dinamico input[type="text"] {
+    width: 75px; /* Tamanho fixo para que todos fiquem alinhados */
+    text-align: center; /* Número bem no meio da caixa */
+    padding: 8px 5px;
     border: 1px solid var(--primary-color);
     border-radius: 6px;
     font-family: 'Poppins', sans-serif;
-    color: #333;
-    outline: none;
+    font-size: 14px;
+    color: #334155;
+    background-color: white;
+    cursor: pointer; /* Mostra a mãozinha para indicar que é clicável */
+    transition: border-color 0.2s;
 }
-.controles-hora-dinamico input[type="time"]:focus {
-    border-color: var(--primary-color);
+
+/* Fica com a borda da nossa cor quando o barbeiro clica nele */
+.controles-hora-dinamico input[type="text"]:focus {
+    border-color: var(--primary-color, #1e293b);
+    outline: none;
 }
 
 /* ==========================================
@@ -596,4 +606,33 @@ nav a.ativo, nav a:hover {
         font-size: 12px;
         min-width: auto; /* Remove a largura mínima para o nome não empurrar as horas */
     }
+}
+
+/* ==========================================
+   ESTILOS DO RELÓGIO FLATPICKR (COM FOCO EM MOBILE UX)
+   ========================================== */
+
+/* 1. As cores do seu tema (Números e Setas) */
+.flatpickr-time input {
+    color: var(--primary-color, #1e293b) !important;
+    font-weight: 600;
+}
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--primary-color, #1e293b) !important;
+}
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--primary-color, #1e293b) !important;
+}
+
+/* 2. Feedback visual ao tocar/clicar (Trocamos o :hover apenas pelo focus e active para Mobile) */
+.flatpickr-time input:focus, 
+.flatpickr-time .numInputWrapper span:active {
+    background: #f1f5f9;
+}
+
+/* 3. UX MOBILE: Aumentar a "Área de Toque" das setinhas */
+/* O Flatpickr tem setas muito finas. Isto deixa-as mais grossas para o dedo acertar fácil */
+.flatpickr-time .numInputWrapper span {
+    width: 25px !important; /* Mais largas */
+    border: 1px solid rgba(0,0,0,0.05); /* Uma bordinha suave para o usuário ver onde tocar */
 }

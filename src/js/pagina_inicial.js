@@ -298,43 +298,77 @@ if (btnAbrirModal) {
     });
 }
 
-// ==========================================
-// LÓGICA DA ABA: MEU PERFIL (SELECT MÚLTIPLO E HORÁRIOS)
-// ==========================================
-
+// =========================================================
+// LÓGICA DA ABA: MEU PERFIL (DROPDOWN CUSTOMIZADO E HORÁRIOS)
+// =========================================================
 const selectDiasTrabalho = document.getElementById('select-dias-trabalho');
 const containerHorarios = document.getElementById('container-horarios-dinamicos');
+const dropdownHeader = document.getElementById('dropdown-dias-header');
+const dropdownLista = document.getElementById('dropdown-dias-lista');
+const dropdownTexto = document.getElementById('dropdown-dias-texto');
+const itensDropdown = document.querySelectorAll('.dropdown-item');
 
 const nomesDosDias = {
-    0: 'Domingo',
-    1: 'Segunda-feira',
-    2: 'Terça-feira',
-    3: 'Quarta-feira',
-    4: 'Quinta-feira',
-    5: 'Sexta-feira',
-    6: 'Sábado'
-}
+    0: 'Domingo', 1: 'Segunda-feira', 2: 'Terça-feira',
+    3: 'Quarta-feira', 4: 'Quinta-feira', 5: 'Sexta-feira', 6: 'Sábado'
+};
 
-if (selectDiasTrabalho) {
-    selectDiasTrabalho.addEventListener('mousedown', function(evento) {
-        // Bloqueia o comportamento padrão chato do navegador
-        evento.preventDefault(); 
-        
-        const opcaoClicada = evento.target;
-        
-        // Se o barbeiro clicou mesmo no texto do dia...
-        if (opcaoClicada.tagName === 'OPTION') {
-            // Liga se estiver desligado, ou desliga se estiver ligado!
-            opcaoClicada.selected = !opcaoClicada.selected;
-            
-            // Avisa o sistema para gerar ou esconder as caixas de horário
-            this.dispatchEvent(new Event('change'));
+// ---------------------------------------------------------
+// 1. INTELIGÊNCIA DA CAPA VISUAL (O DROPDOWN)
+// ---------------------------------------------------------
+if (dropdownHeader) {
+    // Abre/Fecha a lista ao clicar na barra
+    dropdownHeader.addEventListener('click', function(evento) {
+        evento.stopPropagation();
+        const estaAberto = dropdownLista.style.display === 'block';
+        dropdownLista.style.display = estaAberto ? 'none' : 'block';
+    });
+
+    // Fecha a lista se clicar fora dela
+    document.addEventListener('click', function(evento) {
+        if (!dropdownHeader.contains(evento.target) && !dropdownLista.contains(evento.target)) {
+            dropdownLista.style.display = 'none';
         }
     });
 
-    // ---------------------------------------------------------
-    // RESOLUÇÃO DO PROBLEMA 2: Preservar os horários digitados
-    // ---------------------------------------------------------
+    // Ação ao escolher um dia na lista flutuante
+    itensDropdown.forEach(item => {
+        item.addEventListener('click', function() {
+            const valorDia = this.getAttribute('data-valor');
+            this.classList.toggle('selecionado'); // Liga/Desliga a cor visual
+
+            // Comunica a escolha ao <select> escondido
+            const opcaoEscondida = Array.from(selectDiasTrabalho.options).find(opt => opt.value === valorDia);
+            if (opcaoEscondida) {
+                opcaoEscondida.selected = this.classList.contains('selecionado');
+            }
+
+            atualizarTextoDropdown();
+            
+            // Grita para o sistema que houve mudança para desenhar as caixinhas!
+            selectDiasTrabalho.dispatchEvent(new Event('change'));
+        });
+    });
+}
+
+function atualizarTextoDropdown() {
+    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
+    if (selecionados.length === 0) {
+        dropdownTexto.textContent = "Selecione os dias...";
+        dropdownTexto.classList.remove('texto-ativo');
+    } else if (selecionados.length === 1) {
+        dropdownTexto.textContent = selecionados[0].textContent;
+        dropdownTexto.classList.add('texto-ativo');
+    } else {
+        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
+        dropdownTexto.classList.add('texto-ativo');
+    }
+}
+
+// ---------------------------------------------------------
+// 2. GERAÇÃO DINÂMICA DAS CAIXAS DE HORA (COM FLATPICKR)
+// ---------------------------------------------------------
+if (selectDiasTrabalho) {
     selectDiasTrabalho.addEventListener('change', function() {
         const opcoesSelecionadas = Array.from(this.selectedOptions).map(opcao => opcao.value);
 
@@ -345,30 +379,42 @@ if (selectDiasTrabalho) {
             // SE O DIA ESTÁ SELECIONADO...
             if (opcoesSelecionadas.includes(diaId)) {
                 if (!linhaExiste) {
-                    // Cenário A: Não existe na tela ainda. Criamos a caixinha do zero!
+                    // Cria a caixinha do zero
                     const linhaHorario = document.createElement('div');
                     linhaHorario.classList.add('linha-horario-dinamico'); 
                     linhaHorario.id = `linha-dia-${diaId}`;
                     
+                    // AMBOS os inputs agora são type="text" para o Flatpickr funcionar perfeitamente
                     linhaHorario.innerHTML = `
                         <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
                         <div class="controles-hora-dinamico">
-                            <input type="time" id="inicio-dia-${diaId}" required>
+                            <input type="text" id="inicio-dia-${diaId}" placeholder="00:00" required>
                             <span>às</span>
-                            <input type="time" id="fim-dia-${diaId}" required>
+                            <input type="text" id="fim-dia-${diaId}" placeholder="00:00" required>
                         </div>
                     `;
                     containerHorarios.appendChild(linhaHorario);
+
+                    // Ativa o Flatpickr nos novos inputs
+                    const configFlatpickr = {
+                        enableTime: true,
+                        noCalendar: true,
+                        dateFormat: "H:i",
+                        time_24hr: true,
+                        disableMobile: "true"
+                    };
+
+                    flatpickr(`#inicio-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#fim-dia-${diaId}`, configFlatpickr);
+                    
                 } else {
-                    // Cenário B: A linha já existe (só estava escondida).
-                    // Mostramos de novo e os horários continuam lá intactos!
+                    // A linha já existia, apenas volta a aparecer
                     linhaExiste.style.display = 'flex';
                 }
             } 
             // SE O DIA FOI DESMARCADO...
             else {
                 if (linhaExiste) {
-                    // O SEGREDO: Em vez de 'linhaExiste.remove()', apenas escondemos!
                     linhaExiste.style.display = 'none';
                 }
             }
@@ -488,52 +534,6 @@ if (btnSalvarPerfil) {
             btnSalvarPerfil.textContent = textoOriginal;
             btnSalvarPerfil.disabled = false;
         }
-    });
-}
-
-// =========================================================
-// O NOVO DROPDOWN CUSTOMIZADO (A CAPA VISUAL)
-// =========================================================
-const dropdownHeader = document.getElementById('dropdown-dias-header');
-const dropdownLista = document.getElementById('dropdown-dias-lista');
-const dropdownTexto = document.getElementById('dropdown-dias-texto');
-const itensDropdown = document.querySelectorAll('.dropdown-item');
-
-if (dropdownHeader) {
-    // 1. Clicar na barra abre ou fecha a lista flutuante
-    dropdownHeader.addEventListener('click', function(evento) {
-        evento.stopPropagation(); // Impede o clique de vazar para a página
-        const estaAberto = dropdownLista.style.display === 'block';
-        dropdownLista.style.display = estaAberto ? 'none' : 'block';
-    });
-
-    // 2. Fechar a lista de forma inteligente se o utilizador clicar noutro lugar da tela!
-    document.addEventListener('click', function(evento) {
-        if (!dropdownHeader.contains(evento.target) && !dropdownLista.contains(evento.target)) {
-            dropdownLista.style.display = 'none';
-        }
-    });
-
-    // 3. O que acontece quando clica num dia da lista
-    itensDropdown.forEach(item => {
-        item.addEventListener('click', function() {
-            const valorDia = this.getAttribute('data-valor');
-
-            // Inverte o visual (muda de cor / tira a cor)
-            this.classList.toggle('selecionado');
-
-            // Comunica-se com o "Cérebro Escondido" (o Select antigo)
-            const opcaoEscondida = Array.from(selectDiasTrabalho.options).find(opt => opt.value === valorDia);
-            if (opcaoEscondida) {
-                opcaoEscondida.selected = this.classList.contains('selecionado');
-            }
-
-            // Atualiza o texto bonitinho ("2 dias selecionados", etc.)
-            atualizarTextoDropdown();
-
-            // Grita para o resto do sistema que houve uma mudança para desenhar as caixas de horas!
-            selectDiasTrabalho.dispatchEvent(new Event('change'));
-        });
     });
 }
 
