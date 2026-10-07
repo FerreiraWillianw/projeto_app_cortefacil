@@ -97,7 +97,7 @@ inputData.addEventListener('change', async function() {
     // ==========================================
     
     // Mostramos ao cliente que o sistema está a pensar
-    selectHora.innerHTML = '<option value="" disabled selected>A carregar horários...</option>';
+    selectHora.innerHTML = '<option value="" disabled selected>Carregando horários...</option>';
     selectHora.disabled = true;
 
     try {

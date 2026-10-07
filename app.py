@@ -611,6 +611,49 @@ def excluir_agendamento(agendamento_id):
         print("ERRO AO EXCLUIR AGENDAMENTO:", erro)
         return jsonify({"sucesso": False, "mensagem": "Erro ao excluir agendamento."}), 500
 
+# ==============================================================
+# ROTA: ATUALIZAR APENAS A DISPONIBILIDADE DO BARBEIRO
+# ==============================================================
+@app.route('/api/barbeiros/<int:barbeiro_id>/perfil', methods=['PUT'])
+def atualizar_perfil(barbeiro_id):
+    # 1. Recebemos apenas a disponibilidade do JavaScript
+    dados = request.get_json()
+    nova_disponibilidade = dados.get('disponibilidade', [])
+
+    try:
+        conexao = psycopg2.connect(db_url)
+        cursor = conexao.cursor()
+
+        # 2. Limpar a agenda antiga
+        # Removemos todos os horários deste barbeiro para podermos inserir a nova configuração limpa
+        comando_delete = "DELETE FROM disponibilidade_barbeiro WHERE barbeiro_id = %s"
+        cursor.execute(comando_delete, (barbeiro_id,))
+
+        # 3. Inserir a nova disponibilidade
+        if nova_disponibilidade:
+            comando_insert = """
+                INSERT INTO disponibilidade_barbeiro (barbeiro_id, dia_semana, hora_inicio, hora_fim)
+                VALUES (%s, %s, %s, %s)
+            """
+            for disp in nova_disponibilidade:
+                cursor.execute(comando_insert, (
+                    barbeiro_id, 
+                    int(disp['dia_semana']), # Forçamos para Inteiro, respeitando a sua tabela!
+                    disp['hora_inicio'], 
+                    disp['hora_fim']
+                ))
+
+        # 4. Guardamos as alterações
+        conexao.commit()
+        
+        cursor.close()
+        conexao.close()
+
+        return jsonify({"sucesso": True, "mensagem": "Horários guardados com sucesso!"}), 200
+
+    except Exception as erro:
+        print(f"ERRO AO ATUALIZAR HORÁRIOS: {erro}")
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor ao tentar guardar."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

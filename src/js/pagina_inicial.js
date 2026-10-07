@@ -34,6 +34,41 @@ function fazerLogout() {
     window.location.href = 'login.html';
 }
 
+// ==========================================
+// NAVEGAÇÃO DO MENU LATERAL (SISTEMA DE ABAS)
+// ==========================================
+// 1. Capturamos todos os links do menu e todas as seções (abas) da página
+const linksMenu = document.querySelectorAll('#sidebar nav ul li a');
+const secoes = document.querySelectorAll('#conteudo-principal section');
+
+// 2. Para cada link do menu, adicionamos um "ouvinte" de cliques
+linksMenu.forEach(link => {
+    link.addEventListener('click', function(evento) {
+
+        // Evita que a página recarregue ou dê um pulo para o topo
+        evento.preventDefault();
+
+        // Passo A: Esconde todas as abas da tela
+        secoes.forEach(secao => secao.style.display = 'none');
+
+        // Passo B: Remove a cor de destaque de todos os botões do menu
+        linksMenu.forEach(l => l.classList.remove('ativo'));
+
+        // Passo C: Coloca a cor de destaque APENAS no botão que acabou de ser clicado
+        this.classList.add('ativo');
+
+        // Passo D: Descobre qual aba abrir
+        // O this.getAttribute('href') pega o "#perfil" e o replace transforma em "secao-perfil"
+        const idAlvo = this.getAttribute('href').replace('#', 'secao-');
+
+        // Passo E:
+        const secaoAlvo = document.getElementById(idAlvo);
+        if (secaoAlvo) {
+            secaoAlvo.style.display = 'block';
+        }
+    });
+});
+
 
 // ==========================================
 // BOTÃO DE SAIR (LOGOUT SEGURO)
@@ -83,6 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Carrega a agenda pela primeira vez
     carregarMinhaAgenda();
+
+    carregarMeuPerfil();
 });
 
 // Se o barbeiro mudar o status no select, recarrega a lista
@@ -90,7 +127,7 @@ inputFiltroStatus.addEventListener('change', carregarMinhaAgenda);
 
 async function carregarMinhaAgenda() {
     const listaAgendamentos = document.getElementById('lista-agendamentos');
-    listaAgendamentos.innerHTML = '<p style="text-align: center; color: #666;">A carregar a tua agenda...</p>';
+    listaAgendamentos.innerHTML = '<p style="text-align: center; color: #666;">Carregando agenda...</p>';
 
     const dataFiltrada = inputFiltroData.value;
     const statusFiltrado = inputFiltroStatus.value;
@@ -260,3 +297,262 @@ if (btnAbrirModal) {
         }
     });
 }
+
+// =========================================================
+// LÓGICA DA ABA: MEU PERFIL (DROPDOWN CUSTOMIZADO E HORÁRIOS)
+// =========================================================
+const selectDiasTrabalho = document.getElementById('select-dias-trabalho');
+const containerHorarios = document.getElementById('container-horarios-dinamicos');
+const dropdownHeader = document.getElementById('dropdown-dias-header');
+const dropdownLista = document.getElementById('dropdown-dias-lista');
+const dropdownTexto = document.getElementById('dropdown-dias-texto');
+const itensDropdown = document.querySelectorAll('.dropdown-item');
+
+const nomesDosDias = {
+    0: 'Domingo', 1: 'Segunda-feira', 2: 'Terça-feira',
+    3: 'Quarta-feira', 4: 'Quinta-feira', 5: 'Sexta-feira', 6: 'Sábado'
+};
+
+// ---------------------------------------------------------
+// 1. INTELIGÊNCIA DA CAPA VISUAL (O DROPDOWN)
+// ---------------------------------------------------------
+if (dropdownHeader) {
+    // Abre/Fecha a lista ao clicar na barra
+    dropdownHeader.addEventListener('click', function(evento) {
+        evento.stopPropagation();
+        const estaAberto = dropdownLista.style.display === 'block';
+        dropdownLista.style.display = estaAberto ? 'none' : 'block';
+    });
+
+    // Fecha a lista se clicar fora dela
+    document.addEventListener('click', function(evento) {
+        if (!dropdownHeader.contains(evento.target) && !dropdownLista.contains(evento.target)) {
+            dropdownLista.style.display = 'none';
+        }
+    });
+
+    // Ação ao escolher um dia na lista flutuante
+    itensDropdown.forEach(item => {
+        item.addEventListener('click', function() {
+            const valorDia = this.getAttribute('data-valor');
+            this.classList.toggle('selecionado'); // Liga/Desliga a cor visual
+
+            // Comunica a escolha ao <select> escondido
+            const opcaoEscondida = Array.from(selectDiasTrabalho.options).find(opt => opt.value === valorDia);
+            if (opcaoEscondida) {
+                opcaoEscondida.selected = this.classList.contains('selecionado');
+            }
+
+            atualizarTextoDropdown();
+            
+            // Grita para o sistema que houve mudança para desenhar as caixinhas!
+            selectDiasTrabalho.dispatchEvent(new Event('change'));
+        });
+    });
+}
+
+function atualizarTextoDropdown() {
+    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
+    if (selecionados.length === 0) {
+        dropdownTexto.textContent = "Selecione os dias...";
+        dropdownTexto.classList.remove('texto-ativo');
+    } else if (selecionados.length === 1) {
+        dropdownTexto.textContent = selecionados[0].textContent;
+        dropdownTexto.classList.add('texto-ativo');
+    } else {
+        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
+        dropdownTexto.classList.add('texto-ativo');
+    }
+}
+
+// ---------------------------------------------------------
+// 2. GERAÇÃO DINÂMICA DAS CAIXAS DE HORA (COM FLATPICKR)
+// ---------------------------------------------------------
+if (selectDiasTrabalho) {
+    selectDiasTrabalho.addEventListener('change', function() {
+        const opcoesSelecionadas = Array.from(this.selectedOptions).map(opcao => opcao.value);
+
+        for (let i = 0; i <= 6; i++) {
+            const diaId = String(i);
+            const linhaExiste = document.getElementById(`linha-dia-${diaId}`);
+
+            // SE O DIA ESTÁ SELECIONADO...
+            if (opcoesSelecionadas.includes(diaId)) {
+                if (!linhaExiste) {
+                    // Cria a caixinha do zero
+                    const linhaHorario = document.createElement('div');
+                    linhaHorario.classList.add('linha-horario-dinamico'); 
+                    linhaHorario.id = `linha-dia-${diaId}`;
+                    
+                    // AMBOS os inputs agora são type="text" para o Flatpickr funcionar perfeitamente
+                    linhaHorario.innerHTML = `
+                        <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
+                        <div class="controles-hora-dinamico">
+                            <input type="text" id="inicio-dia-${diaId}" placeholder="00:00" required>
+                            <span>às</span>
+                            <input type="text" id="fim-dia-${diaId}" placeholder="00:00" required>
+                        </div>
+                    `;
+                    containerHorarios.appendChild(linhaHorario);
+
+                    // Ativa o Flatpickr nos novos inputs
+                    const configFlatpickr = {
+                        enableTime: true,
+                        noCalendar: true,
+                        dateFormat: "H:i",
+                        time_24hr: true,
+                        disableMobile: "true"
+                    };
+
+                    flatpickr(`#inicio-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#fim-dia-${diaId}`, configFlatpickr);
+                    
+                } else {
+                    // A linha já existia, apenas volta a aparecer
+                    linhaExiste.style.display = 'flex';
+                }
+            } 
+            // SE O DIA FOI DESMARCADO...
+            else {
+                if (linhaExiste) {
+                    linhaExiste.style.display = 'none';
+                }
+            }
+        }
+    });
+}
+
+// 2. FUNÇÃO QUE CARREGA OS DADOS DO BANCO AO ABRIR O PERFIL
+async function carregarMeuPerfil() {
+    try {
+        // Aproveitamos a rota que já criamos para a "Agenda"
+        const resposta = await fetch(`${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/disponibilidade`);
+        const dados = await resposta.json();
+
+        if (dados.sucesso) {
+            const disponibilidadeSalva = dados.disponibilidade;
+            // Passo A: extrair apenas os números dos dias que vieram do banco
+            const diasParaSelecionar = disponibilidadeSalva.map(item => String(item.dia_semana));
+
+            // Passo B: Percorrer as opções do <select> e marcar como "selected" as que vieram do banco
+            // Seleciona as opções corretas no Menu Escondido e Pinta a Capa Visual
+            Array.from(selectDiasTrabalho.options).forEach(opcao => {
+                const itemVisual = document.querySelector(`.dropdown-item[data-valor="${opcao.value}"]`);
+                if (diasParaSelecionar.includes(opcao.value)) {
+                    opcao.selected = true;
+                    if (itemVisual) itemVisual.classList.add('selecionado');
+                } else {
+                    opcao.selected = false;
+                    if (itemVisual) itemVisual.classList.remove('selecionado');
+                }
+            });
+            
+            // Atualiza a barra de texto (ex: "5 dias selecionados")
+            atualizarTextoDropdown();
+
+            // Passo C: Disparar manualmente o evento 'change' para que o JavaScript desenhe as caixas de hora na tela
+            selectDiasTrabalho.dispatchEvent(new Event('change'));
+
+            // Passo D: Agora que as caixas foram desenhadas, preenchemos os valores lá dentro!
+            disponibilidadeSalva.forEach(item => {
+                const diaId = String(item.dia_semana);
+                const inputInicio = document.getElementById(`inicio-dia-${diaId}`);
+                const inputFim = document.getElementById(`fim-dia-${diaId}`);
+
+                if (inputInicio && inputFim) {
+                    // O slice(0, 5) corta os segundos do banco de dados ("09:00:00" e vira "09:00")
+                    inputInicio.value = item.hora_inicio.slice(0, 5)
+                    inputFim.value = item.hora_fim.slice(0, 5)
+                }
+            });
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar os dados do perfil:", erro)
+    }
+};
+
+
+// ==========================================
+// SALVAR APENAS A DISPONIBILIDADE (HORÁRIOS)
+// ==========================================
+const btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
+
+if (btnSalvarPerfil) {
+    btnSalvarPerfil.addEventListener('click', async function() {
+        
+        // 1. Coletamos APENAS os dias que estão selecionados no <select>
+        const opcoesSelecionadas = Array.from(selectDiasTrabalho.selectedOptions).map(opcao => opcao.value);
+        const novaDisponibilidade = [];
+
+        // 2. Verificamos os horários de cada dia selecionado
+        for (let dia of opcoesSelecionadas) {
+            const inicio = document.getElementById(`inicio-dia-${dia}`).value;
+            const fim = document.getElementById(`fim-dia-${dia}`).value;
+
+            // Validação: Se marcou o dia, é obrigatório colocar a hora
+            if (!inicio || !fim) {
+                const nomeDoDia = nomesDosDias[dia];
+                alert(`⚠️ Atenção: Preencha o horário de início e fim para ${nomeDoDia}, ou desmarque este dia.`);
+                return; // O 'return' cancela a gravação e para o código aqui
+            }
+
+            // Guardamos os dados validados na nossa lista
+            novaDisponibilidade.push({
+                dia_semana: dia,
+                hora_inicio: inicio,
+                hora_fim: fim
+            });
+        }
+
+        // 3. Mudamos o botão para dar feedback visual
+        const textoOriginal = btnSalvarPerfil.textContent;
+        btnSalvarPerfil.textContent = 'A guardar os horários...';
+        btnSalvarPerfil.disabled = true;
+
+        try {
+            // 4. Enviamos o pacote APENAS com a lista de disponibilidade para o Python
+            const resposta = await fetch(`${BASE_URL}/api/barbeiros/${ID_BARBEIRO}/perfil`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    disponibilidade: novaDisponibilidade
+                })
+            });
+
+            const dados = await resposta.json();
+
+            if (dados.sucesso) {
+                alert("✅ Horários atualizados com sucesso!");
+            } else {
+                alert("❌ Erro ao guardar: " + dados.mensagem);
+            }
+        } catch (erro) {
+            console.error("Erro ao salvar horários:", erro);
+            alert("Erro de comunicação com o servidor.");
+        } finally {
+            // Restaura o botão ao normal, independentemente de dar erro ou sucesso
+            btnSalvarPerfil.textContent = textoOriginal;
+            btnSalvarPerfil.disabled = false;
+        }
+    });
+}
+
+// Função auxiliar para mudar o texto da barra dependendo de quantos dias escolheu
+function atualizarTextoDropdown() {
+    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
+
+    if (selecionados.length === 0) {
+        // 1. Cenário Vazio: Texto padrão e removemos o estilo de destaque
+        dropdownTexto.textContent = "Selecione os dias...";
+        dropdownTexto.classList.remove('texto-ativo');
+    } else if (selecionados.length === 1) {
+        // 2. Cenário 1 Dia: Mostra o nome do dia e adiciona o estilo de destaque
+        dropdownTexto.textContent = selecionados[0].textContent;
+        dropdownTexto.classList.add('texto-ativo');
+    } else {
+        // 3. Cenário Vários Dias: Mostra a contagem e adiciona o estilo de destque
+        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
+        dropdownTexto.classList.add('texto-ativo');
+    }
+}
+

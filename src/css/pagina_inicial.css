@@ -437,7 +437,7 @@ nav a.ativo, nav a:hover {
     justify-content: space-between;
     align-items: center;
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ccc;
     padding: 12px 15px;
     border-radius: 8px;
     animation: aparecer 0.3s ease-out;
@@ -452,7 +452,7 @@ nav a.ativo, nav a:hover {
 .nome-dia-dinamico {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    color: #334155;
+    color: var(--primary-color);
     min-width: 100px;
 }
 
@@ -462,15 +462,177 @@ nav a.ativo, nav a:hover {
     gap: 10px;
 }
 
-/* Inputs de hora gerados dinamicamente */
-.controles-hora-dinamico input[type="time"] {
-    padding: 8px;
-    border: 1px solid #ccc;
+/* ==========================================
+   ESTILIZAÇÃO DOS INPUTS DE TEXTO (AS CAIXAS DE HORA)
+   ========================================== */
+.controles-hora-dinamico input[type="text"] {
+    width: 75px; /* Tamanho fixo para que todos fiquem alinhados */
+    text-align: center; /* Número bem no meio da caixa */
+    padding: 8px 5px;
+    border: 1px solid var(--primary-color);
     border-radius: 6px;
     font-family: 'Poppins', sans-serif;
-    color: #333;
+    font-size: 14px;
+    color: #334155;
+    background-color: white;
+    cursor: pointer; /* Mostra a mãozinha para indicar que é clicável */
+    transition: border-color 0.2s;
+}
+
+/* Fica com a borda da nossa cor quando o barbeiro clica nele */
+.controles-hora-dinamico input[type="text"]:focus {
+    border-color: var(--primary-color, #1e293b);
     outline: none;
 }
-.controles-hora-dinamico input[type="time"]:focus {
-    border-color: var(--primary-color);
+
+/* ==========================================
+   ESTILOS DO DROPDOWN CUSTOMIZADO DE DIAS
+   ========================================== */
+
+/* A barra onde o utilizador clica para abrir */
+.dropdown-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* 40px para não sobrepor o ícone do calendário */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    color: #334155;
+    transition: 0.2s;
+}
+.dropdown-header-custom:hover {
+    border-color: var(--primary-color, #1e293b);
+}
+
+/* A lista flutuante que cai */
+.dropdown-lista-custom {
+    position: absolute;
+    top: 55px; /* Fica mesmo por baixo do header */
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 100; /* Flutua por cima de tudo na tela! */
+    overflow: hidden;
+    animation: abrirDropdown 0.2s ease-out;
+}
+
+@keyframes abrirDropdown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cada opção de dia (Domingo, Segunda...) */
+.dropdown-item {
+    padding: 12px 15px 12px 40px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    color: #475569;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s;
+}
+.dropdown-item:hover {
+    background-color: var(--light-primary);
+    color: white;
+    font-weight: 600;
+}
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+/* Quando o utilizador seleciona o dia */
+.dropdown-item.selecionado {
+    background-color: var(--primary-color, #1e293b);
+    color: white;
+    font-weight: 600;
+}
+
+
+#btn-salvar-perfil {
+    background-color: var(--light-primary);
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#btn-salvar-perfil:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+#dropdown-dias-texto.texto-ativo {
+    color: var(--primary-color, #1e293b);
+    transition: color 0.3s ease;
+}
+
+/* ==========================================
+   RESPONSIVIDADE: ADAPTAÇÃO PARA CELULARES
+   ========================================== */
+
+/* Esta regra diz: "Só aplica este código se a tela tiver no máximo 500px de largura" */
+@media (max-width: 500px) {
+    
+    /* 1. Ajustamos a caixa principal da linha */
+    .linha-horario-dinamico {
+        padding: 10px; /* Reduzimos a 'gordura' externa para ganhar espaço */
+        flex-wrap: wrap; /* PLANO B: Se a tela for minúscula, permite que a hora vá para a linha de baixo */
+        gap: 5px; /* Espaço caso ocorra a quebra de linha */
+    }
+
+    /* 2. Aproximamos os campos de hora (trazemos para a esquerda) */
+    .controles-hora-dinamico {
+        gap: 5px; /* O espaço original era maior. Aqui juntamos o '08:00', o 'às' e o '18:00' */
+    }
+
+    /* 3. Emagrecemos as caixinhas de hora */
+    .controles-hora-dinamico input[type="time"] {
+        padding: 4px 6px; /* Diminui o espaço por dentro da borda */
+        font-size: 13px;  /* Reduz levemente o tamanho do número para caber melhor */
+    }
+
+    /* 4. Reduzimos levemente a fonte do dia da semana */
+    .nome-dia-dinamico {
+        font-size: 12px;
+        min-width: auto; /* Remove a largura mínima para o nome não empurrar as horas */
+    }
+}
+
+/* ==========================================
+   ESTILOS DO RELÓGIO FLATPICKR (COM FOCO EM MOBILE UX)
+   ========================================== */
+
+/* 1. As cores do seu tema (Números e Setas) */
+.flatpickr-time input {
+    color: var(--primary-color, #1e293b) !important;
+    font-weight: 600;
+}
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--primary-color, #1e293b) !important;
+}
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--primary-color, #1e293b) !important;
+}
+
+/* 2. Feedback visual ao tocar/clicar (Trocamos o :hover apenas pelo focus e active para Mobile) */
+.flatpickr-time input:focus, 
+.flatpickr-time .numInputWrapper span:active {
+    background: #f1f5f9;
+}
+
+/* 3. UX MOBILE: Aumentar a "Área de Toque" das setinhas */
+/* O Flatpickr tem setas muito finas. Isto deixa-as mais grossas para o dedo acertar fácil */
+.flatpickr-time .numInputWrapper span {
+    width: 25px !important; /* Mais largas */
+    border: 1px solid rgba(0,0,0,0.05); /* Uma bordinha suave para o usuário ver onde tocar */
 }
