@@ -95,8 +95,14 @@ nav a.ativo, nav a:hover {
     padding: 20px;
 }
 
+/* =========================================
+   ESTILO BASE DO CABEÇALHO (Computador)
+   ========================================= */
 .cabecalho-secao {
     margin-bottom: 25px;
+    display: flex; /* Transforma num container flexível */
+    justify-content: space-between; /* Empurra o texto para a esquerda e o botão para a direita */
+    align-items: center; /* Alinha verticalmente no centro */
 }
 
 .cabecalho-secao h2 {
@@ -147,7 +153,7 @@ nav a.ativo, nav a:hover {
     font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
-    font-size: 12px
+    font-size: 15px
 }
 
 .btn-selecionar-barbearia:hover {
@@ -841,4 +847,22 @@ nav a.ativo, nav a:hover {
         margin-left: 0 !important;
         padding-bottom: 100px !important;
     }
+
+    /* ==========================================
+   Dentro do seu @media screen and (max-width: 768px)
+   ========================================== */
+    
+    /* Quando for telemóvel, o cabeçalho muda de comportamento */
+    .cabecalho-secao {
+        flex-direction: column; /* Coloca os itens em formato de coluna (um debaixo do outro) */
+        align-items: flex-start; /* Alinha o texto e o botão à esquerda */
+        gap: 15px; /* Adiciona um espaço de 15px entre o texto e o botão */
+    }
+
+    /* BÓNUS DE UX MOBILE: O botão ocupa a largura toda para ser mais fácil clicar com o dedo! */
+    .cabecalho-secao #btn-abrir-modal-agendamento {
+        width: 100%; 
+        justify-content: center; /* Centraliza o texto "+ Novo Agendamento" dentro do botão */
+    }
 }
+
