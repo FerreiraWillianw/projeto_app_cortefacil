@@ -95,8 +95,14 @@ nav a.ativo, nav a:hover {
     padding: 20px;
 }
 
+/* =========================================
+   ESTILO BASE DO CABEÇALHO (Computador)
+   ========================================= */
 .cabecalho-secao {
     margin-bottom: 25px;
+    display: flex; /* Transforma num container flexível */
+    justify-content: space-between; /* Empurra o texto para a esquerda e o botão para a direita */
+    align-items: center; /* Alinha verticalmente no centro */
 }
 
 .cabecalho-secao h2 {
@@ -142,11 +148,12 @@ nav a.ativo, nav a:hover {
     background-color: var(--light-primary);
     color: #ffffff;
     border: none;
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
+    font-size: 15px
 }
 
 .btn-selecionar-barbearia:hover {
@@ -636,3 +643,229 @@ nav a.ativo, nav a:hover {
     width: 25px !important; /* Mais largas */
     border: 1px solid rgba(0,0,0,0.05); /* Uma bordinha suave para o usuário ver onde tocar */
 }
+
+/* =========================================
+   2. MENU LATERAL (ESTRUTURA BASE)
+   ========================================= */
+#sidebar {
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+#sidebar nav ul {
+    list-style: none; /* Remove bolinhas da lista */
+    margin: 0;
+    padding: 0;
+}
+#sidebar nav a { text-decoration: none; }
+
+
+/* ==========================================
+   🖥️ COMPUTADOR (Telas grandes)
+   Visual padrão do painel lateral
+   ========================================== */
+@media screen and (min-width: 769px) {
+    #sidebar {
+        width: 250px;
+        min-height: 100vh;
+        padding: 15px 20px;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #eee;
+    }
+    
+    .logo-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .logo-container img {
+        width: 80px;
+        height: auto;
+    }
+    
+    #sidebar nav { flex: 1; }
+    
+    #sidebar nav ul {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    #sidebar nav ul li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #666;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+    #sidebar nav ul li a .icon i { font-size: 20px; }
+    
+    /* Fundo azul no item ativo no PC */
+    #sidebar nav ul li.ativo a, 
+    #sidebar nav ul li a:hover {
+        background-color: var(--primary-color);
+        color: var(--light-color);
+    }
+    #sidebar nav ul li.ativo a .icon i { color: white; justify-content: center; }
+    
+    /* Oculta a bolinha mágica no PC */
+    #sidebar nav ul .circle { display: none; }
+}
+
+
+/* ==========================================
+   📱 TELEMÓVEL (Telas pequenas) - MENU MÁGICO
+   ========================================== */
+@media screen and (max-width: 768px) {
+    
+    /* Cores de apoio para a ilusão de ótica */
+    :root {
+        --cor-fundo-site: #f4f7f6; /* A cor do seu body */
+        --cor-menu: var(--cor-fundo-site);
+    }
+
+    /* O menu vira uma barra no fundo do telemóvel */
+    #sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 45px;
+        background-color: var(--cor-menu);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-top-right-radius: 20px;
+        border-top-left-radius: 20px;
+        padding: 0;
+    }
+
+    #sidebar .logo-container { display: none; } /* Esconde a logo */
+    
+    #sidebar nav {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background-color: var(--primary-color);
+        border-radius: 8px;
+    }
+
+    #sidebar nav ul {
+        display: flex;
+        width: 210px; /* Largura exata de 3 itens de 70px */
+        position: relative;
+        flex-direction: row;
+    }
+
+    #sidebar nav ul li {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        z-index: 2; /* Os botões ficam por cima da bolinha */
+    }
+
+    #sidebar nav ul li a {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        font-weight: 500;
+        background: transparent !important; /* BLINDAGEM: Impede o fundo azul do PC */
+        border: none !important;
+    }
+
+    #sidebar nav ul li a .icon {
+        position: relative;
+        display: block;
+        line-height: 70px;
+        transition: 0.5s;
+        color: white;
+    }
+    
+    #sidebar nav ul li a .icon i { font-size: 24px; }
+
+    /* EFEITO: O Ícone salta para cima */
+    #sidebar nav ul li.ativo a .icon {
+        color: var(--light-color); 
+        transform: translateY(-30px);
+        align-items: center;
+        top: -5px;
+        right: 1px;
+    }
+
+    #sidebar nav ul li a .text {
+        position: absolute;
+        color: white;
+        font-weight: 600;
+        font-size: 10px;
+        transition: 0.5s;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    /* EFEITO: O texto aparece */
+    #sidebar nav ul li.ativo a .text {
+        opacity: 1;
+        transform: translateY(5px);
+    }
+
+    /* A BOLINHA DESLIZANTE */
+    #sidebar nav ul .circle {
+        display: block;
+        position: absolute;
+        top: -35px;
+        left: 0;
+        width: 60px;
+        height: 60px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        border: 6px solid var(--cor-fundo-site); 
+        transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+        z-index: 1; /* Fica por trás dos ícones */
+    }
+
+    /* Curvas que ligam a bolinha ao menu */
+    #sidebar nav ul .circle::before {
+        content: ''; position: absolute; top: 50%; left: -22px; width: 20px; height: 20px;
+        background-color: transparent; border-top-right-radius: 20px; box-shadow: 1px -10px 0 0 var(--cor-fundo-site);
+    }
+    #sidebar nav ul .circle::after {
+        content: ''; position: absolute; top: 50%; right: -22px; width: 20px; height: 20px;
+        background-color: transparent; border-top-left-radius: 20px; box-shadow: -1px -10px 0 0 var(--cor-fundo-site);
+    }
+
+    /* MOVIMENTO DA BOLINHA */
+    #sidebar nav ul li:nth-child(1).ativo ~ .circle { transform: translateX(0); }
+    #sidebar nav ul li:nth-child(2).ativo ~ .circle { transform: translateX(75px); }
+    #sidebar nav ul li:nth-child(3).ativo ~ .circle { transform: translateX(140px); }
+
+    /* Evita que o conteúdo da página fique debaixo da barra */
+    #conteudo-principal {
+        margin-left: 0 !important;
+        padding-bottom: 100px !important;
+    }
+
+    /* ==========================================
+   Dentro do seu @media screen and (max-width: 768px)
+   ========================================== */
+    
+    /* Quando for telemóvel, o cabeçalho muda de comportamento */
+    .cabecalho-secao {
+        flex-direction: column; /* Coloca os itens em formato de coluna (um debaixo do outro) */
+        align-items: flex-start; /* Alinha o texto e o botão à esquerda */
+        gap: 15px; /* Adiciona um espaço de 15px entre o texto e o botão */
+    }
+
+    /* BÓNUS DE UX MOBILE: O botão ocupa a largura toda para ser mais fácil clicar com o dedo! */
+    .cabecalho-secao #btn-abrir-modal-agendamento {
+        width: 100%; 
+        justify-content: center; /* Centraliza o texto "+ Novo Agendamento" dentro do botão */
+    }
+}
+

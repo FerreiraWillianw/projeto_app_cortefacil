@@ -26,19 +26,33 @@
         
         <nav>
             <ul>
-                <!-- A classe 'ativo' marca qual página estamos a ver agora -->
-                <li>
-                    <a href="#minha-agenda" class="ativo"><i class="ph ph-calendar-check"></i> Minha Agenda</a>
+                <!-- Item 1: agenda (Começa Ativo) -->
+                <li class="list ativo">
+                    <a href="#minha-agenda">
+                        <span class="icon"><i class="ph ph-calendar-check"></i></span>
+                        <span class="text">Agenda</span>
+                    </a>
                 </li>
-                <li>
-                    <a href="#perfil"><i class="ph ph-user"></i> Meu Perfil</a>
+
+                <!-- Item 2: Perfil -->
+                <li class="list">
+                    <a href="#perfil">
+                        <span class="icon"><i class="ph ph-user"></i></span>
+                        <span class="text">Perfil</span>
+                    </a>
                 </li>
+
+                <!-- Item 3: Sair -->
+                <li class="list">
+                    <a href="#" id="btn-sair">
+                        <span class="icon"><i class="ph ph-sign-out"></i></span>
+                        <span class="text">Sair</span>
+                    </a>
+                </li>
+
+                <div class="circle"></div>
             </ul>
         </nav>
-
-        <div class="logout">
-            <a href="#" id="btn-sair"><i class="ph ph-sign-out"></i> Sair</a>
-        </div>
     </aside>
 
     <!-- ==========================================
@@ -54,7 +68,7 @@
                     <p>Estes são os seus próximos clientes.</p>
                 </div>
                 <!-- Botão para abrir o Modal -->
-                <button id="btn-abrir-modal-agendamento" class="btn-selecionar-barbearia" style="width: auto; padding: 10px 20px;">
+                <button id="btn-abrir-modal-agendamento" class="btn-selecionar-barbearia">
                     + Novo Agendamento
                 </button>
             </header>

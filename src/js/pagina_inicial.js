@@ -40,35 +40,32 @@ function fazerLogout() {
 // 1. Capturamos todos os links do menu e todas as seções (abas) da página
 const linksMenu = document.querySelectorAll('#sidebar nav ul li a');
 const secoes = document.querySelectorAll('#conteudo-principal section');
+const itensLista = document.querySelectorAll('#sidebar nav ul li');
 
-// 2. Para cada link do menu, adicionamos um "ouvinte" de cliques
 linksMenu.forEach(link => {
     link.addEventListener('click', function(evento) {
+        // Se for o botão de sair, não tenta abrir uma aba, deixa o comportamento noraml
+        if (this.getAttribute('id') === 'btn-sair') return;
 
-        // Evita que a página recarregue ou dê um pulo para o topo
         evento.preventDefault();
 
-        // Passo A: Esconde todas as abas da tela
+        // 1. esconde todas as abas
         secoes.forEach(secao => secao.style.display = 'none');
 
-        // Passo B: Remove a cor de destaque de todos os botões do menu
-        linksMenu.forEach(l => l.classList.remove('ativo'));
+        // 2. Remove a classe 'ativo' de todos os <li> (Isto reseta a bolinha)
+        itensLista.forEach(li => li.classList.remove('ativo'));
 
-        // Passo C: Coloca a cor de destaque APENAS no botão que acabou de ser clicado
-        this.classList.add('ativo');
+        // 3. Adiciona a classe 'ativo' APENAS no <li> pai do link clicado
+        this.parentElement.classList.add('ativo');
 
-        // Passo D: Descobre qual aba abrir
-        // O this.getAttribute('href') pega o "#perfil" e o replace transforma em "secao-perfil"
-        const idAlvo = this.getAttribute('href').replace('#', 'secao-');
-
-        // Passo E:
+        // 4. Mostra a aba correta
+        const idAlvo = this.getAttribute('href').replace('#', 'secao-'); 
         const secaoAlvo = document.getElementById(idAlvo);
         if (secaoAlvo) {
             secaoAlvo.style.display = 'block';
         }
     });
 });
-
 
 // ==========================================
 // BOTÃO DE SAIR (LOGOUT SEGURO)
@@ -555,4 +552,6 @@ function atualizarTextoDropdown() {
         dropdownTexto.classList.add('texto-ativo');
     }
 }
+
+
 
