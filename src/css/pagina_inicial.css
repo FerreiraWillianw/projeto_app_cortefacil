@@ -733,7 +733,7 @@ nav a.ativo, nav a:hover {
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 70px;
+        height: 45px;
         background-color: var(--cor-menu);
         display: flex;
         justify-content: center;
@@ -794,6 +794,9 @@ nav a.ativo, nav a:hover {
     #sidebar nav ul li.ativo a .icon {
         color: var(--light-color); 
         transform: translateY(-30px);
+        align-items: center;
+        top: -5px;
+        right: 1px;
     }
 
     #sidebar nav ul li a .text {
@@ -809,7 +812,7 @@ nav a.ativo, nav a:hover {
     /* EFEITO: O texto aparece */
     #sidebar nav ul li.ativo a .text {
         opacity: 1;
-        transform: translateY(10px);
+        transform: translateY(5px);
     }
 
     /* A BOLINHA DESLIZANTE */
@@ -818,8 +821,8 @@ nav a.ativo, nav a:hover {
         position: absolute;
         top: -35px;
         left: 0;
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
         background-color: var(--primary-color);
         border-radius: 50%;
         border: 6px solid var(--cor-fundo-site); 
@@ -839,7 +842,7 @@ nav a.ativo, nav a:hover {
 
     /* MOVIMENTO DA BOLINHA */
     #sidebar nav ul li:nth-child(1).ativo ~ .circle { transform: translateX(0); }
-    #sidebar nav ul li:nth-child(2).ativo ~ .circle { transform: translateX(70px); }
+    #sidebar nav ul li:nth-child(2).ativo ~ .circle { transform: translateX(75px); }
     #sidebar nav ul li:nth-child(3).ativo ~ .circle { transform: translateX(140px); }
 
     /* Evita que o conteúdo da página fique debaixo da barra */
