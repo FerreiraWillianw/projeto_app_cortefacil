@@ -144,6 +144,21 @@ nav a.ativo, nav a:hover {
     gap: 5px;
 }
 
+.card-info p.date, 
+.card-info p.clock {
+    color: #777;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: bold;
+}
+
+.card-info p.date i, 
+.card-info p.clock i {
+    font-weight: bold;
+}
+
 .btn-selecionar-barbearia {
     background-color: var(--light-primary);
     color: #ffffff;
@@ -278,14 +293,13 @@ nav a.ativo, nav a:hover {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-left: 10px; /* Dá um espacinho do nome */
 }
 
 /* Cores das etiquetas */
 .badge-pendente {
-    background-color: #fef08a; /* Amarelo suave */
+    background-color: #fff5a8; /* Amarelo suave */
     color: #854d0e;            /* Texto castanho/amarelo escuro */
 }
 
@@ -578,6 +592,39 @@ nav a.ativo, nav a:hover {
     font-weight: 600;
 }
 
+.btn-concluir-agendamento {
+    flex: 1;
+    background-color: var(--secondary-color);
+    color: var(--dark-color);
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 5px;
+}
+
+.btn-concluir-agendamento:hover {
+    transform: translateY(-3px)
+}
+
+.btn-cancelar-agendamento {
+    flex: 1;
+    background-color: #ffbdbd;
+    color: #d63031;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 5px;
+}
+
+.btn-cancelar-agendamento:hover {
+    transform: translateY(-3px)
+}
+
+/*flex: 1; background-color: var(--secondary-color); color: var(--dark-color);"*/
 #dropdown-dias-texto.texto-ativo {
     color: var(--primary-color, #1e293b);
     transition: color 0.3s ease;

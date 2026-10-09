@@ -175,13 +175,16 @@ async function carregarMinhaAgenda() {
                             ${badgeHTML}
                         </div>
                         <p><i class="ph ph-phone"></i> ${telefoneTexto}</p>
-                        <p><i class="ph ph-calendar-blank"></i> ${dataBR}</p>
-                        <p><i class="ph ph-clock"></i> ${horaFormatada}</p>
+                        <p class='date'><i class="ph ph-calendar-blank"></i> ${dataBR}</p>
+                        <p class='clock'><i class="ph ph-clock"></i> ${horaFormatada}</p>
                     </div>
                     
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        ${ag.status === 'pendente' ? `<button class="btn-selecionar-barbearia" onclick="atualizarStatus(${ag.id}, 'concluido')" style="flex: 1; background-color: var(--secondary-color); color: var(--dark-color);">Concluir</button>` : ''}
-                        <button class="btn-selecionar-barbearia" onclick="excluirAgendamento(${ag.id})" style="flex: 1; background-color: #ffeaea; color: #d63031;">Excluir</button>
+                        ${ag.status === 'pendente' ? `
+                            <button class="btn-concluir-agendamento" onclick="atualizarStatus(${ag.id}, 'concluido')">Concluir</button>
+                            <button class="btn-cancelar-agendamento" onclick="abrirModalCancelar(${ag.id})">Cancelar</button>
+                            ` : ''}
+                
                     </div>
                 `;
 
@@ -194,29 +197,53 @@ async function carregarMinhaAgenda() {
     }
 }
 
-// Funções para os botões do cartão (Concluir e Excluir)
+// Esta função faz exatamente o que a sua rota pede no botão de concluir e cancelar: envia o ID e o novo status.
 async function atualizarStatus(idAgendamento, novoStatus) {
     try {
         const resposta = await fetch(`${BASE_URL}/api/agendamentos/${idAgendamento}/status`, {
-            method: 'PATCH',
+            method: 'PUT', // O método que você definiu no Python!
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: novoStatus })
+            body: JSON.stringify({ status: novoStatus }) // Envia 'concluido' ou 'cancelado'
         });
+        
         const dados = await resposta.json();
         
-        if (dados.sucesso) carregarMinhaAgenda(); // Recarrega a tela para o cartão sumir
-    } catch (erro) { console.error("Erro ao atualizar:", erro); }
+        if (dados.sucesso) {
+            carregarMinhaAgenda(); // Recarrega a tela para atualizar o visual
+        } else {
+            alert("Erro: " + dados.mensagem);
+        }
+    } catch (erro) { 
+        console.error("Erro ao comunicar com a API:", erro); 
+    }
 }
 
-async function excluirAgendamento(idAgendamento) {
-    if (!confirm("Excluir este agendamento?")) return;
-    try {
-        const resposta = await fetch(`${BASE_URL}/api/agendamentos/${idAgendamento}`, { method: 'DELETE' });
-        const dados = await resposta.json();
-        
-        if (dados.sucesso) carregarMinhaAgenda(); // Recarrega a tela para o cartão sumir
-    } catch (erro) { console.error("Erro ao excluir:", erro); }
+// 1. A nossa memória (variável) para saber qual cliente cancelar
+let idParaCancelar = null;
+
+// 2. A função "Guarda-Costas" que o botão vermelho do cartão chama
+function abrirModalCancelar(idAgendamento) {
+    idParaCancelar = idAgendamento; // Guarda o ID na memória
+    document.getElementById('modal-confirmacao').style.display = 'flex'; // Abre a tela preta
 }
+
+// 3. Se o barbeiro clicar em "Não, Voltar" no Modal
+document.getElementById('btn-voltar-confirmacao').addEventListener('click', function() {
+    document.getElementById('modal-confirmacao').style.display = 'none'; // Apenas esconde o modal
+    idParaCancelar = null; // Limpa a memória por segurança
+});
+
+// 4. Se o barbeiro clicar em "Sim, Cancelar" no Modal
+document.getElementById('btn-confirmar-cancelamento').addEventListener('click', function() {
+    if (idParaCancelar !== null) {
+        // Agora sim! O Modal chama a SUA função original, enviando o ID guardado e a palavra 'cancelado'
+        atualizarStatus(idParaCancelar, 'cancelado');
+        
+        // Esconde o modal e limpa a memória
+        document.getElementById('modal-confirmacao').style.display = 'none';
+        idParaCancelar = null; 
+    }
+});
 
 // ==========================================
 // LÓGICA DO MODAL DE AGENDAMENTO MANUAL

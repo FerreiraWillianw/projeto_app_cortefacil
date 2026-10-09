@@ -560,56 +560,45 @@ def listar_agendamentos_barbeiro(barbeiro_id):
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
 # ==============================================================
-# ROTA 11: ATUALIZAR STATUS DO AGENDAMENTO (Ex: Concluir)
+# ROTA 11: ATUALIZAR STATUS DO AGENDAMENTO
 # ==============================================================
-@app.route('/api/agendamentos/<int:agendamento_id>/status', methods=['PATCH'])
+@app.route('/api/agendamentos/<int:agendamento_id>/status', methods=['PUT'])
 def atualizar_status_agendamento(agendamento_id):
+    # 1. Abre o pacote JSON recebido do Fron-end
     dados = request.get_json()
-    novo_status = dados.get('status') # O JavaScript vai enviar 'concluido' ou 'cancelado'
+    novo_status = dados.get('status')
+
+    # Definimos quais os status são permitidos
+    status_permitidos = ['concluido', 'cancelado', 'pendente']
+
+    # Verificamos se o status enviado pelo JavaScript está fora da lista acima
+    if novo_status not in status_permitidos:
+        # Se for uma palavra estranha, paramos o código aqui e devolvemos um erro!
+        return jsonify({"sucesso": False, "mensagem": "Status inválido!"}), 400
 
     try:
         conexao = psycopg2.connect(db_url)
         cursor = conexao.cursor()
 
-        # Atualiza apenas a coluna status do agendamento específico
-        cursor.execute("""
-            UPDATE agendamentos 
-            SET status = %s 
+        sql = """
+            UPDATE agendamentos
+            SET status = %s
             WHERE id = %s
-        """, (novo_status, agendamento_id))
+        """
 
-        conexao.commit() # Salva a alteração
+        cursor.execute(sql, (novo_status, agendamento_id))
+
+        # Salva a alteração permanentemente no banco
+        conexao.commit()
+
         cursor.close()
         conexao.close()
 
-        return jsonify({"sucesso": True, "mensagem": "Status atualizado com sucesso!"}), 200
+        return jsonify({"sucesso": True, "mensagem": f"Agendamento alterado para {novo_status} com sucesso!"}), 200
 
     except Exception as erro:
         print("ERRO AO ATUALIZAR STATUS:", erro)
-        return jsonify({"sucesso": False, "mensagem": "Erro ao atualizar status."}), 500
-
-
-# ==============================================================
-# ROTA 12: EXCLUIR AGENDAMENTO
-# ==============================================================
-@app.route('/api/agendamentos/<int:agendamento_id>', methods=['DELETE'])
-def excluir_agendamento(agendamento_id):
-    try:
-        conexao = psycopg2.connect(db_url)
-        cursor = conexao.cursor()
-
-        # Apaga a linha inteira da tabela de agendamentos
-        cursor.execute("DELETE FROM agendamentos WHERE id = %s", (agendamento_id,))
-
-        conexao.commit() # Salva a alteração
-        cursor.close()
-        conexao.close()
-
-        return jsonify({"sucesso": True, "mensagem": "Agendamento excluído com sucesso!"}), 200
-
-    except Exception as erro:
-        print("ERRO AO EXCLUIR AGENDAMENTO:", erro)
-        return jsonify({"sucesso": False, "mensagem": "Erro ao excluir agendamento."}), 500
+        return jsonify({"sucesso": False, "mensagem": "Erro interno ao atualizar status."}), 500
 
 # ==============================================================
 # ROTA: ATUALIZAR APENAS A DISPONIBILIDADE DO BARBEIRO
