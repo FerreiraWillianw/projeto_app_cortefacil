@@ -69,3 +69,96 @@ async function carregarHorariosDisponiveis(barbeiroId, dataSelecionada, idSelect
         selectHora.innerHTML = '<option value="" disabled selected>Erro ao carregar</option>';
     }
 }
+
+// ==========================================
+// CRIADOR DE SELECTS CUSTOMIZADOS (GENÉRICO & MÚLTIPLO)
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", function() {
+    
+    const selectsOriginais = document.querySelectorAll('.select-customizado');
+
+    selectsOriginais.forEach(selectOriginal => {
+        const container = selectOriginal.parentElement;
+        
+        // Descobre se este select é de múltipla escolha ou não
+        const eMultiplo = selectOriginal.hasAttribute('multiple');
+        
+        const header = document.createElement('div');
+        header.className = 'select-falso-header';
+        
+        // Define o texto inicial
+        if (eMultiplo) {
+            header.textContent = "Selecione as opções...";
+        } else {
+            header.textContent = selectOriginal.options[selectOriginal.selectedIndex].text;
+        }
+        
+        const lista = document.createElement('ul');
+        lista.className = 'select-falso-lista';
+
+        // Lógica de clicar no Header para abrir/fechar
+        header.addEventListener('click', function(evento) {
+            evento.stopPropagation(); 
+            const estaAberto = lista.style.display === 'block';
+            
+            document.querySelectorAll('.select-falso-lista').forEach(l => l.style.display = 'none');
+            document.querySelectorAll('.select-falso-header').forEach(h => h.classList.remove('aberto'));
+
+            if (!estaAberto) {
+                lista.style.display = 'block';
+                header.classList.add('aberto');
+            }
+        });
+
+        // Cria os itens da lista
+        Array.from(selectOriginal.options).forEach(opcaoOriginal => {
+            const li = document.createElement('li');
+            li.textContent = opcaoOriginal.text;
+            
+            // Evento de Clique na opção
+            li.addEventListener('click', function(evento) {
+                
+                if (eMultiplo) {
+                    // ==========================================
+                    // LÓGICA PARA MÚLTIPLA ESCOLHA (DIAS DA SEMANA)
+                    // ==========================================
+                    evento.stopPropagation(); // Impede a lista de fechar!
+                    
+                    // Inverte a seleção (se estava clicado, desclica)
+                    opcaoOriginal.selected = !opcaoOriginal.selected;
+                    li.classList.toggle('item-selecionado');
+                    
+                    // Conta quantos itens estão selecionados para atualizar o texto do Header
+                    const selecionados = Array.from(selectOriginal.selectedOptions).length;
+                    if (selecionados === 0) header.textContent = "Selecione os dias...";
+                    else if (selecionados === 1) header.textContent = "1 dia selecionado";
+                    else header.textContent = `${selecionados} dias selecionados`;
+                    
+                } else {
+                    // ==========================================
+                    // LÓGICA PARA ESCOLHA ÚNICA (EX: FILTRO DE STATUS)
+                    // ==========================================
+                    header.textContent = opcaoOriginal.text;
+                    selectOriginal.value = opcaoOriginal.value;
+                    lista.style.display = 'none';
+                    header.classList.remove('aberto');
+                }
+                
+                // Avisa o sistema que o valor mudou
+                selectOriginal.dispatchEvent(new Event('change'));
+            });
+            
+            lista.appendChild(li);
+        });
+
+        container.appendChild(header);
+        container.appendChild(lista);
+    });
+
+    // Clicar fora fecha os menus
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.select-falso-lista').forEach(l => l.style.display = 'none');
+        document.querySelectorAll('.select-falso-header').forEach(h => h.classList.remove('aberto'));
+    });
+});

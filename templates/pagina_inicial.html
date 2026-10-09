@@ -136,29 +136,11 @@
                 <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Selecione os dias da semana em que estará disponível</p>
                 <p style="font-size: 9px; color: red; margin-bottom: 5px;">Caso algum estiver desmarcado, será considerado como indisponível.</p>
                 
-                <div class="input-wrapper" style="margin-bottom: 15px; position: relative;">
-                    <i class="ph ph-calendar" style="justify-content: center;"></i>
+                <div class="input-wrapper custom-select-container" style="margin-bottom: 15px;">
+                    <i class="ph ph-calendar"></i>
                     
-                    <!-- 1. A NOSSA CAPA VISUAL (O Dropdown Customizado) -->
-                    <div id="dropdown-dias-header" class="dropdown-header-custom">
-                        <span id="dropdown-dias-texto">Selecione os dias...</span>
-                        <i class="ph ph-caret-down" style="position: static; color: #64748b; transform: none; font-size: 16px;"></i>
-                    </div>
-
-                    <!-- A lista que vai "cair" ao clicar -->
-                    <div id="dropdown-dias-lista" class="dropdown-lista-custom" style="display: none;">
-                        <div class="dropdown-item" data-valor="0">Domingo</div>
-                        <div class="dropdown-item" data-valor="1">Segunda-feira</div>
-                        <div class="dropdown-item" data-valor="2">Terça-feira</div>
-                        <div class="dropdown-item" data-valor="3">Quarta-feira</div>
-                        <div class="dropdown-item" data-valor="4">Quinta-feira</div>
-                        <div class="dropdown-item" data-valor="5">Sexta-feira</div>
-                        <div class="dropdown-item" data-valor="6">Sábado</div>
-                    </div>
-
-                    <!-- 2. O CÉREBRO ESCONDIDO (O select antigo) -->
-                    <!-- Repare no style="display: none;" -->
-                    <select id="select-dias-trabalho" multiple style="display: none;">
+                    <!-- O CÉREBRO LIMPO: Apenas o select original com a nossa classe! -->
+                    <select id="select-dias-trabalho" multiple class="select-customizado">
                         <option value="0">Domingo</option>
                         <option value="1">Segunda-feira</option>
                         <option value="2">Terça-feira</option>

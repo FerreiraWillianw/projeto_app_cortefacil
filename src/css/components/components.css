@@ -87,3 +87,12 @@ select.select-customizado {
 .select-falso-lista li:last-child {
     border-bottom: none;
 }
+
+/* ==========================================
+   ESTILO PARA ITENS SELECIONADOS (MÚLTIPLA ESCOLHA)
+   ========================================== */
+.select-falso-lista li.item-selecionado {
+    background-color: var(--primary-color, #1e293b);
+    color: white;
+    font-weight: 600;
+}
