@@ -367,7 +367,7 @@ if (dropdownHeader) {
                 opcaoEscondida.selected = this.classList.contains('selecionado');
             }
 
-            atualizarTextoDropdown();
+
             
             // Grita para o sistema que houve mudança para desenhar as caixinhas!
             selectDiasTrabalho.dispatchEvent(new Event('change'));
@@ -375,19 +375,7 @@ if (dropdownHeader) {
     });
 }
 
-function atualizarTextoDropdown() {
-    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
-    if (selecionados.length === 0) {
-        dropdownTexto.textContent = "Selecione os dias...";
-        dropdownTexto.classList.remove('texto-ativo');
-    } else if (selecionados.length === 1) {
-        dropdownTexto.textContent = selecionados[0].textContent;
-        dropdownTexto.classList.add('texto-ativo');
-    } else {
-        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
-        dropdownTexto.classList.add('texto-ativo');
-    }
-}
+
 
 // ---------------------------------------------------------
 // 2. GERAÇÃO DINÂMICA DAS CAIXAS DE HORA (COM FLATPICKR)
@@ -446,6 +434,63 @@ if (selectDiasTrabalho) {
     });
 }
 
+// ==========================================
+// FUNÇÃO AJUDANTE: PREENCHER OS DIAS NO NOVO MENU (VERSÃO ROTA 7)
+// ==========================================
+function preencherDiasNoMenuCustomizado(disponibilidadeDoBanco) {
+    // 1. Encontra os nossos elementos na tela
+    const selectOriginal = document.getElementById('select-dias-trabalho');
+    if (!selectOriginal) return; // Sai em segurança se não achar o HTML
+
+    const container = selectOriginal.parentElement;
+    const header = container.querySelector('.select-falso-header');
+    const lis = container.querySelectorAll('.select-falso-lista li');
+
+    // 2. Limpeza Geral: Começamos com uma "folha em branco"
+    Array.from(selectOriginal.options).forEach(opt => opt.selected = false);
+    if (lis) lis.forEach(li => li.classList.remove('item-selecionado'));
+
+    // 3. Se não houver dados, ajusta o texto e sai
+    if (!disponibilidadeDoBanco || disponibilidadeDoBanco.length === 0) {
+        if (header) header.textContent = "Selecione os dias...";
+        return;
+    }
+
+    // 4. O EXTRATOR (A Mágica para a sua Rota 7):
+    // Transforma [{dia_semana: 1, ...}, {dia_semana: 2, ...}] numa lista simples ["1", "2"]
+    let arrayDias = [];
+    if (Array.isArray(disponibilidadeDoBanco)) {
+        // O .map() percorre cada item da lista e extrai apenas a propriedade 'dia_semana'
+        arrayDias = disponibilidadeDoBanco.map(item => String(item.dia_semana));
+    }
+
+    // 5. O Pintor: Lê a nossa lista limpa e pinta o Menu
+    let quantidadeSelecionada = 0;
+
+    Array.from(selectOriginal.options).forEach((opt, index) => {
+        // Verifica se o valor da opção (ex: "1") está dentro da nossa lista extraída
+        if (arrayDias.includes(String(opt.value))) {
+            
+            opt.selected = true; // Marca no Cérebro (Select Original)
+            
+            // Pinta de azul o item na tela
+            if (lis[index]) {
+                lis[index].classList.add('item-selecionado');
+            }
+            quantidadeSelecionada++; // Aumenta a contagem
+        }
+    });
+
+    // 6. Atualiza o texto da nossa caixa (Header) com o total
+    if (quantidadeSelecionada === 0) {
+        if (header) header.textContent = "Selecione os dias...";
+    } else if (quantidadeSelecionada === 1) {
+        if (header) header.textContent = "1 dia selecionado";
+    } else {
+        if (header) header.textContent = `${quantidadeSelecionada} dias selecionados`;
+    }
+}
+
 // 2. FUNÇÃO QUE CARREGA OS DADOS DO BANCO AO ABRIR O PERFIL
 async function carregarMeuPerfil() {
     try {
@@ -455,6 +500,7 @@ async function carregarMeuPerfil() {
 
         if (dados.sucesso) {
             const disponibilidadeSalva = dados.disponibilidade;
+            preencherDiasNoMenuCustomizado(disponibilidadeSalva);
             // Passo A: extrair apenas os números dos dias que vieram do banco
             const diasParaSelecionar = disponibilidadeSalva.map(item => String(item.dia_semana));
 
@@ -471,8 +517,7 @@ async function carregarMeuPerfil() {
                 }
             });
             
-            // Atualiza a barra de texto (ex: "5 dias selecionados")
-            atualizarTextoDropdown();
+
 
             // Passo C: Disparar manualmente o evento 'change' para que o JavaScript desenhe as caixas de hora na tela
             selectDiasTrabalho.dispatchEvent(new Event('change'));
@@ -561,24 +606,6 @@ if (btnSalvarPerfil) {
     });
 }
 
-// Função auxiliar para mudar o texto da barra dependendo de quantos dias escolheu
-function atualizarTextoDropdown() {
-    const selecionados = Array.from(selectDiasTrabalho.selectedOptions);
-
-    if (selecionados.length === 0) {
-        // 1. Cenário Vazio: Texto padrão e removemos o estilo de destaque
-        dropdownTexto.textContent = "Selecione os dias...";
-        dropdownTexto.classList.remove('texto-ativo');
-    } else if (selecionados.length === 1) {
-        // 2. Cenário 1 Dia: Mostra o nome do dia e adiciona o estilo de destaque
-        dropdownTexto.textContent = selecionados[0].textContent;
-        dropdownTexto.classList.add('texto-ativo');
-    } else {
-        // 3. Cenário Vários Dias: Mostra a contagem e adiciona o estilo de destque
-        dropdownTexto.textContent = `${selecionados.length} dias selecionados`;
-        dropdownTexto.classList.add('texto-ativo');
-    }
-}
 
 
 
