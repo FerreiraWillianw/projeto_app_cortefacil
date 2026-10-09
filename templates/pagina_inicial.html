@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
     <link rel="stylesheet" href="../src/css/pagina_inicial.css">
+    <link rel="stylesheet" href="../src/css/components/components.css">
 </head>
 <body>
 
@@ -84,9 +85,9 @@
                 </div>
                 
                 <!-- Filtro de Status -->
-                <div class="input-wrapper" style="flex: 1; min-width: 200px; margin: 0;">
+                <div class="input-wrapper custom-select-container">
                     <i class="ph ph-funnel"></i>
-                    <select id="filtro-status" style="padding: 12px 12px 12px 40px; border-radius: 8px; border: 1px solid #ccc; width: 100%; font-family: 'Poppins';">
+                    <select id="filtro-status" class="select-customizado">
                         <option value="todos">Todos (Ativos)</option>
                         <option value="pendente">Pendentes</option>
                         <option value="concluido">Concluídos</option>

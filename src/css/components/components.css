@@ -1,0 +1,89 @@
+/* ==========================================
+   COMPONENTE GENÉRICO: SELECT CUSTOMIZADO
+   ========================================== */
+
+/* Esconde o select original (feio) que tem a classe 'select-customizado' */
+select.select-customizado {
+    display: none !important;
+}
+
+/* O container relativo que segura o nosso menu falso */
+.custom-select-container {
+    position: relative;
+    width: 100%;
+}
+
+/* A caixa onde o utilizador clica para abrir (Parecida com o seu input normal) */
+.select-falso-header {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* 40px dá espaço para o ícone à esquerda */
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #333;
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s ease;
+}
+
+.select-falso-header:hover {
+    border-color: var(--primary-color, #1e293b);
+}
+
+/* A setinha que aponta para baixo */
+.select-falso-header::after {
+    content: '▼';
+    font-size: 10px;
+    color: #64748b;
+    transition: transform 0.3s;
+}
+
+/* Quando o menu está aberto, a setinha vira para cima */
+.select-falso-header.aberto::after {
+    transform: rotate(180deg);
+}
+
+/* A lista de opções que flutua (O Menu Dropdown) */
+.select-falso-lista {
+    position: absolute;
+    top: 100%; /* Fica exatamente colado na base do header */
+    left: 0;
+    right: 0;
+    margin-top: 5px;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 999; /* Fica por cima de tudo */
+    list-style: none; /* Remove as bolinhas da lista */
+    padding: 0;
+    display: none; /* Nasce escondido */
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+}
+
+/* Cada opção da lista */
+.select-falso-lista li {
+    padding: 12px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s;
+}
+
+.select-falso-lista li:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color, #1e293b);
+    font-weight: 600;
+}
+
+/* Para não ter linha no último item */
+.select-falso-lista li:last-child {
+    border-bottom: none;
+}
