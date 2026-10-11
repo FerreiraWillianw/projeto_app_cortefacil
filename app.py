@@ -2,7 +2,7 @@ import os
 import psycopg2 
 import random 
 from datetime import datetime, timedelta 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS 
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -68,6 +68,14 @@ def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
     except Exception as e:
         print("Erro ao enviar e-mail:", e)
         return False
+
+# ==============================================================
+# ROTA PRINCIPAL: A PORTA DE ENTRADA DO SITE
+# ==============================================================
+@app.route('/')
+def pagina_inicial():
+    # O Python vai procurar este arquivo automaticamente dentro da pasta 'templates'
+    return render_template('login.html')
 
 # ==============================================================
 # ROTA: LOGIN
