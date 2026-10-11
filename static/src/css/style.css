@@ -1,0 +1,359 @@
+:root {
+    --primary-color: #090c9b;
+    --light-primary: #3d52d5;
+    --secondary-color: #94d3bc;
+    --navy-eletric: #090c9b;
+    --light-green: #7EE66E;
+    --dark-color: #3c3744;
+    --contrast-lightcolor: #76a500;
+}
+/* Esconde o ícone de olho padrão do navegador Edge/Chrome */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button {
+    display: none;
+}
+
+/* ==========================================
+   ESTILOS PERSONALIZADOS DO CALENDÁRIO (FLATPICKR)
+   ========================================== */
+
+/* Como os dias bloqueados (folgas e dias passados) devem aparecer */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+    color: #f70404 !important;             /* Texto cinzento claro */
+    background-color: #ff7777 !important;    /* Fundo ligeiramente cinzento */
+    text-decoration: line-through;           /* Faz um risco no meio do número (opcional, mas excelente para UX!) */
+    cursor: not-allowed !important;          /* Muda o cursor do rato para o símbolo de proibido 🚫 */
+    opacity: 0.7;                            /* Deixa o botão um pouco transparente */
+}
+
+/* Deixa o dia de hoje destacado com a nossa cor principal (se quiser) */
+.flatpickr-day.today {
+    border-color: var(--primary-color) !important;
+}
+/*----------------------------------------------------------*/
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: white;
+    color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 20px;
+}
+
+.logo-topo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1))
+}
+
+#login-container {
+    width: 100%;
+    max-width: 430px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0px 10px 35px rgba(0, 0, 0, 0.25); /* Suavizei um pouco a sombra para ficar mais moderna */
+    text-align: center;
+
+}
+
+#login-container h2 {
+    margin-bottom: 10px
+}
+
+/* Container que envolve o input e o ícone */
+.input-wrapper {
+    position: relative; /* Transforma a div na nossa âncora principal */
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Configuração do Ícone */
+.input-wrapper i {
+    position: absolute; /* Tira o ícone do fluxo normal, permitindo movê-lo livremente */
+    left: 12px; /* Empurra 12 pixels da margem esquerda para dentro */
+    top: 50%; /* Coloca no meio vertical da div */
+    transform: translateY(-50%); /* Ajuste fino matemático para centralizar perfeitamente na vertical */
+    
+    font-size: 20px; /* Tamanho do ícone */
+    color: #888; /* Cor cinza para o ícone */
+}
+
+/* Ao colocarmos .input-wrapper antes de .toggle-senha, tornamos esta regra mais forte (específica) */
+.input-wrapper .toggle-senha {
+    left: auto; /* Agora sim, o navegador vai obedecer e cancelar a margem esquerda! */
+    right: 15px; /* E vai colar o ícone do lado direito */
+    cursor: pointer;
+    color: #666;
+    font-size: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;;
+}
+
+/* Mostra o olhinho SOMENTE se o campo estiver com foco (selecionado) */
+.input-wrapper input:focus ~ .toggle-senha {
+    opacity: 1; 
+    pointer-events: auto; 
+}
+
+/* Adiciona espaço na direita dos campos que usam o olhinho */
+input#senha, 
+input#confirmar-senha {
+    padding-right: 45px;
+}
+
+/* Configuração do Input */
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* IMPORTANTE: 40px de espaço na esquerda para o texto não cobrir o ícone! */
+    border: 1px solid #ccc;
+    border-radius: 8px; /* Bordas arredondadas */
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+    font-family: 'Poppins', sans-serif;
+    color: var(--primary-color);
+    background-color: white;
+}
+
+.input-wrapper select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.input-wrapper .seta-select {
+    left: auto;
+    right: 12px;
+    pointer-events: none;
+}
+
+/* Estilo quando clica no campo */
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    border-color: var(--primary-color); /* Dourado */
+}
+
+/* Se o campo estiver focado, acende o ícone também */ 
+.input-wrapper select:focus + i,
+.input-wrapper:focus-within i:not(.seta-select) {
+    color: var(--primary-color);
+}
+
+button[type="submit"], #btn-validar-codigo {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover, #btn-validar-codigo:hover {
+    background-color: #3d52d5;
+}
+
+#btn-reenviar-codigo {
+    padding: 10px;
+    color: var(--dark-color);
+    background-color: var(--light-green);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#btn-reenviar-codigo:hover {
+    background-color: var(--light-primary);
+    color: var(--light-green);
+}
+
+#btn-voltar {
+    padding: 6px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: red;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#btn-voltar:hover {
+    background-color: rgb(255, 92, 92);
+}
+
+
+#login-container p {
+    margin-top: 25px;
+    font-size: 14px;
+    color: var(--primary-color)
+}
+
+#login-container p a{
+    color: var(--light-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+#login-container p a:hover{
+    text-decoration: underline;
+   
+}
+
+@media screen and (max-width: 480px) {
+    #login-container {
+        padding: 25px 20px; /* Reduz o espaçamento interno (Cima/Baixo: 25px, Lados: 20px) */
+        border-radius: 8px; /* Cantos levemente menos arredondados em telas pequenas */
+    }
+
+    #login-container h2 {
+        font-size: 22px; /* Diminui o título de leve */
+    }
+
+    #login-container p {
+        font-size: 12px;
+    }
+}
+
+/* =========================================
+   CUSTOM SELECT (MENU DE OPÇÕES PERSONALIZADO)
+   ========================================= */
+.custom-select-wrapper {
+    position: relative;
+    user-select: none; /* Evita que o texto seja selecionado acidentalmente ao clicar */
+}
+
+/* O visual da caixa fechada (imita o input normal) */
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* Mantém o espaço para o ícone da esquerda */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #ffffff;
+    color: #888; /* Cor cinza (estilo placeholder) */
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Quando uma opção é escolhida, a cor muda para a principal */
+.custom-select-trigger.selected {
+    color: var(--primary-color);
+}
+
+/* Quando o menu está aberto (focado) */
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--primary-color);
+}
+.custom-select-wrapper.open i:first-child {
+    color: var(--primary-color); /* Pinta o ícone do bookmark de azul */
+}
+
+/* A lista suspensa (as opções) */
+.custom-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 5px; /* Espacinho entre a caixa e a lista */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    
+    /* Escondido por padrão usando opacidade e visibilidade para permitir animação suave */
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
+    z-index: 10; /* Garante que flutua por cima dos outros inputs */
+    list-style: none; /* Remove as bolinhas da lista (ul) */
+    overflow: hidden; /* Mantém os cantos arredondados */
+}
+
+/* Mostra a lista quando o wrapper ganha a classe 'open' */
+.custom-select-wrapper.open .custom-select-options {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Estilo individual de cada opção (li) */
+.custom-select-options li {
+    padding: 12px 15px 12px 10px; /* Alinhado com o texto principal */
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* Efeito ao passar o rato (hover) na opção - usa a tua variável secundária! */
+.custom-select-options li:hover {
+    background-color: var(--light-primary); 
+    color: white;
+}
+
+@supports (appearance: base-select) {
+    .input-wrapper select,
+    .input-wrapper select::picker(select) {
+        appearance: base-select;
+    }
+
+    /* A caixa da lista */
+    .input-wrapper select::picker(select) {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 6px;
+        background: white;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        margin-top: 4px;
+    }
+
+    /* Cada opção */
+    .input-wrapper select option {
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+    }
+
+    .input-wrapper select option:hover,
+    .input-wrapper select option:focus {
+        background: var(--secondary-color);
+        color: (var(--primary-color));
+    }
+
+    .input-wrapper select option:checked {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Esconde a seta nativa nova, já que você tem a sua */
+    .input-wrapper select::picker-icon {
+        display: none;
+    }
+}
