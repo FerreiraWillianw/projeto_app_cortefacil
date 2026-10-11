@@ -85,6 +85,10 @@ def painel_barbeiro():
 def tela_cadastro():
     return render_template('cadastro.html')
 
+@app.route('/agendar')
+def tela_agendar():
+    return render_template('agendar.html')
+
 # ==============================================================
 # ROTA: LOGIN
 # ==============================================================
