@@ -90,7 +90,13 @@ formCadastro.addEventListener('submit', async function(evento) {
     const senha = document.getElementById('senha').value;
     const confirmacao = document.getElementById('confirmar-senha').value;
 
-    const regraSenhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // REGRA ATUALIZADA: 
+    // (?=.*[a-z]) -> Pelo menos uma minúscula
+    // (?=.*[A-Z]) -> Pelo menos uma maiúscula
+    // (?=.*\d)    -> Pelo menos um número
+    // (?=.*[\W_]) -> Pelo menos QUALQUER caractere especial
+    // .{8,}       -> Mínimo de 8 caracteres no total
+    const regraSenhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
     if (!regraSenhaForte.test(senha)) {
         alert("❌ A senha precisa ter no mínimo 8 caracteres, com letras maísculas, minúsculas e caractere especial!");
