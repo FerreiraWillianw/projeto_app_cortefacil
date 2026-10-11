@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS 
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
 
 import smtplib
 from email.mime.text import MIMEText
@@ -14,10 +15,10 @@ from email.mime.multipart import MIMEMultipart
 # 1. Carregar configurações
 load_dotenv()
 db_url = os.getenv("CONNECTION_STRING")
-email_sistema = os.getenv("EMAIL_SISTEMA")
-senha_sistema = os.getenv("SENHA_SISTEMA")
+brevo_api_key = os.getenv("BREVO_API_KEY")
+email_remetente = os.getenv("EMAIL_REMETENTE")
 
-if not db_url or not email_sistema or not senha_sistema:
+if not db_url or not brevo_api_key or not email_remetente:
     raise ValueError("Faltam variáveis no arquivo .env!")
 
 app = Flask(__name__)
@@ -32,47 +33,45 @@ codigos_recuperacao = {}
 # FUNÇÃO: ENVIAR E-MAIL COM CÓDIGO (COM TRAVA DE SEGURANÇA)
 # ==============================================================
 def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
-    mensagem = MIMEMultipart()
-    mensagem['From'] = email_sistema
-    mensagem['To'] = destinatario
-
-    # Escolhemos o Assunto e o Texto baseados no motivo
     if motivo == "cadastro":
-        mensagem['Subject'] = "Seu código de verificação - CorteFácil"
-        corpo_email = f"""
-            Olá!
-                
-            Você solicitou a criação de uma conta no CorteFácil.
-            Seu código de verificação é: {codigo}
-                
-            Este código é válido por apenas 2 minutos.
-                
-            Se não solicitou este código, ignore este e-mail.
-        """
-    elif motivo == "recuperacao":
-        mensagem['Subject'] = "Recuperação de Senha - CorteFácil"
-        corpo_email = f"""
-            Olá!
-                
-            Você solicitou a recuperação da sua senha no CorteFácil.
-            Seu código de segurança para redefinir a senha é: {codigo}
-                
-            Se você não solicitou esta alteração, por favor ignore este e-mail. Ninguém pode acessar sua conta sem este código.
-        """
-
-    mensagem.attach(MIMEText(corpo_email, 'plain'))
+        assunto = "Seu código de verificação - CorteFácil"
+        corpo = (
+            f"Olá!\n\n"
+            f"Você solicitou a criação de uma conta no CorteFácil.\n"
+            f"Seu código de verificação é: {codigo}\n\n"
+            f"Este código é válido por apenas 2 minutos.\n\n"
+            f"Se não solicitou este código, ignore este e-mail."
+        )
+    else:
+        assunto = "Recuperação de Senha - CorteFácil"
+        corpo = (
+            f"Olá!\n\n"
+            f"Você solicitou a recuperação da sua senha no CorteFácil.\n"
+            f"Seu código de segurança é: {codigo}\n\n"
+            f"Se você não solicitou esta alteração, ignore este e-mail."
+        )
 
     try:
-        # AQUI ESTÁ A MÁGICA: Adicionamos o timeout=15
-        # O Python só vai esperar 15 segundos pela resposta do Gmail.
-        servidor = smtplib.SMTP('smtp.gmail.com', 587, timeout=15)
-        servidor.starttls() 
-        servidor.login(email_sistema, senha_sistema) 
-        servidor.send_message(mensagem) 
-        servidor.quit() 
-        return True
+        resposta = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": brevo_api_key,
+                "accept": "application/json",
+                "content-type": "application/json",
+            },
+            json={
+                "sender": {"name": "CorteFácil", "email": email_remetente},
+                "to": [{"email": destinatario}],
+                "subject": assunto,
+                "textContent": corpo,
+            },
+            timeout=10,
+        )
+        if resposta.status_code in (200, 201):
+            return True
+        print("Erro Brevo:", resposta.status_code, resposta.text)
+        return False
     except Exception as e:
-        # Se demorar mais de 15 segundos, ou a senha estiver errada, ele cai aqui com segurança!
         print("Erro ao enviar e-mail:", e)
         return False
 
