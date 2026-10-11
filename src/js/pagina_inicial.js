@@ -19,7 +19,7 @@ const barbeiroLogado = JSON.parse(crachaTexto);
 // ==========================================
 // CONFIGURAÇÕES GERAIS E INTEGRAÇÃO (PYTHON)
 // ==========================================
-const BASE_URL = 'http://127.0.0.1:5000';
+const BASE_URL = window.location.origin;
 
 // 4. A MÁGICA: Agora usamos o ID real de quem fez login!
 const ID_BARBEIRO = barbeiroLogado.id;

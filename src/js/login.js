@@ -1,5 +1,5 @@
 const formLogin = document.getElementById('form-login');
-const BASE_URL = 'http://127.0.0.1:5000';
+const BASE_URL = window.location.origin;
 
 formLogin.addEventListener('submit', async function(evento) {
     evento.preventDefault();

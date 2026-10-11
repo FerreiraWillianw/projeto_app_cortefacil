@@ -644,5 +644,13 @@ def atualizar_perfil(barbeiro_id):
         print(f"ERRO AO ATUALIZAR HORÁRIOS: {erro}")
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor ao tentar guardar."}), 500
 
+# ==============================================================
+# ROTA DE MONITORAMENTO (UPTIME ROBOT)
+# ==============================================================
+@app.route('/ping', methods=['GET'])
+def ping():
+    # Devolve apenas uma mensagem simples de texto e o código de sucesso HTTP 200
+    return "Servidor online e operante!", 200
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
