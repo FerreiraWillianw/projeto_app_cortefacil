@@ -32,7 +32,7 @@ formLogin.addEventListener('submit', async function(evento) {
             alert("🎉 " + dadosResposta.mensagem);
 
             // Se deu tudo certo, redireciona o utilizador para a página principal!
-            window.location.href = 'pagina_inicial.html';
+            window.location.href = '/painel';
         } else {
             // Mensagem genérica: "E-mail ou senha incorretos" por segurança
             alert('❌ ' + dadosResposta.mensagem);

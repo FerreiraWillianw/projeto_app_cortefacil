@@ -2,10 +2,11 @@ import os
 import psycopg2 
 import random 
 from datetime import datetime, timedelta 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS 
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
 
 import smtplib
 from email.mime.text import MIMEText
@@ -14,10 +15,10 @@ from email.mime.multipart import MIMEMultipart
 # 1. Carregar configurações
 load_dotenv()
 db_url = os.getenv("CONNECTION_STRING")
-email_sistema = os.getenv("EMAIL_SISTEMA")
-senha_sistema = os.getenv("SENHA_SISTEMA")
+brevo_api_key = os.getenv("BREVO_API_KEY")
+email_remetente = os.getenv("EMAIL_REMETENTE")
 
-if not db_url or not email_sistema or not senha_sistema:
+if not db_url or not brevo_api_key or not email_remetente:
     raise ValueError("Faltam variáveis no arquivo .env!")
 
 app = Flask(__name__)
@@ -27,47 +28,72 @@ cadastros_pendentes = {}
 codigos_recuperacao = {}
 
 # 2. Função de E-mail
+
+# ==============================================================
+# FUNÇÃO: ENVIAR E-MAIL COM CÓDIGO (COM TRAVA DE SEGURANÇA)
+# ==============================================================
 def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
-    mensagem = MIMEMultipart()
-    mensagem['From'] = email_sistema
-    mensagem['To'] = destinatario
-
-    # Escolhemos o Assunto e o Texto baseados no motivo
     if motivo == "cadastro":
-        mensagem['Subject'] = "Seu código de verificação - CorteFácil"
-        corpo_email = f"""
-            Olá!
-                
-            Você solicitou a criação de uma conta no CorteFácil.
-            Seu código de verificação é: {codigo}
-                
-            Este código é válido por apenas 2 minutos.
-                
-            Se não solicitou este código, ignore este e-mail.
-        """
-    elif motivo == "recuperacao":
-        mensagem['Subject'] = "Recuperação de Senha - CorteFácil"
-        corpo_email = f"""
-            Olá!
-                
-            Você solicitou a recuperação da sua senha no CorteFácil.
-            Seu código de segurança para redefinir a senha é: {codigo}
-                
-            Se você não solicitou esta alteração, por favor ignore este e-mail. Ninguém pode acessar sua conta sem este código.
-        """
-
-    mensagem.attach(MIMEText(corpo_email, 'plain'))
+        assunto = "Seu código de verificação - CorteFácil"
+        corpo = (
+            f"Olá!\n\n"
+            f"Você solicitou a criação de uma conta no CorteFácil.\n"
+            f"Seu código de verificação é: {codigo}\n\n"
+            f"Este código é válido por apenas 2 minutos.\n\n"
+            f"Se não solicitou este código, ignore este e-mail."
+        )
+    else:
+        assunto = "Recuperação de Senha - CorteFácil"
+        corpo = (
+            f"Olá!\n\n"
+            f"Você solicitou a recuperação da sua senha no CorteFácil.\n"
+            f"Seu código de segurança é: {codigo}\n\n"
+            f"Se você não solicitou esta alteração, ignore este e-mail."
+        )
 
     try:
-        servidor = smtplib.SMTP('smtp.gmail.com', 587)
-        servidor.starttls() 
-        servidor.login(email_sistema, senha_sistema) 
-        servidor.send_message(mensagem) 
-        servidor.quit() 
-        return True
+        resposta = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": brevo_api_key,
+                "accept": "application/json",
+                "content-type": "application/json",
+            },
+            json={
+                "sender": {"name": "CorteFácil", "email": email_remetente},
+                "to": [{"email": destinatario}],
+                "subject": assunto,
+                "textContent": corpo,
+            },
+            timeout=10,
+        )
+        if resposta.status_code in (200, 201):
+            return True
+        print("Erro Brevo:", resposta.status_code, resposta.text)
+        return False
     except Exception as e:
         print("Erro ao enviar e-mail:", e)
         return False
+
+# ==============================================================
+# ROTA PRINCIPAL: A PORTA DE ENTRADA DO SITE
+# ==============================================================
+@app.route('/')
+def pagina_inicial():
+    # O Python vai procurar este arquivo automaticamente dentro da pasta 'templates'
+    return render_template('login.html')
+
+@app.route('/painel')
+def painel_barbeiro():
+    return render_template('pagina_inicial.html')
+
+@app.route('/cadastro', methods=['GET'])
+def tela_cadastro():
+    return render_template('cadastro.html')
+
+@app.route('/agendar')
+def tela_agendar():
+    return render_template('agendar.html')
 
 # ==============================================================
 # ROTA: LOGIN

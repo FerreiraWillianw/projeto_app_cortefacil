@@ -222,7 +222,7 @@ btnValidarCodigo.addEventListener('click', async function() {
 
         if (dadosResposta.sucesso === true) {
             alert('🎉 ' + dadosResposta.mensagem);
-            window.location.href = 'login.html';
+            window.location.href = '/';
         } else {
             alert('❌ Erro: ' + dadosResposta.mensagem);
             btnValidarCodigo.textContent = 'Validar e Criar Conta';

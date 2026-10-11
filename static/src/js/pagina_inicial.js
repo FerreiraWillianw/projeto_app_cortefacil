@@ -8,7 +8,7 @@ const crachaTexto = localStorage.getItem('barbeiro_logado');
 // 2. Se não existir, expulsa imediatamente!
 if (!crachaTexto) {
     alert("⛔ Acesso negado! Por favor, faça o login primeiro.");
-    window.location.href = 'login.html';
+    window.location.href = '/';
 }
 
 // 3. Se o código chegou aqui, é porque ele tem o crachá. 
@@ -31,7 +31,7 @@ const ID_BARBEIRO = barbeiroLogado.id;
 
 function fazerLogout() {
     localStorage.removeItem('barbeiro_logado');
-    window.location.href = 'login.html';
+    window.location.href = '/';
 }
 
 // ==========================================
@@ -81,7 +81,7 @@ if (btnSair) {
         localStorage.removeItem('barbeiro_logado');
 
         // 2. Mandamos o utilizador de volta para o login
-        window.location.href = 'login.html'
+        window.location.href = '/'
     })
 }
 

@@ -12,8 +12,8 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
-    <link rel="stylesheet" href="../src/css/pagina_inicial.css">
-    <link rel="stylesheet" href="../src/css/components/components.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/pagina_inicial.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/components/components.css') }}">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
          ========================================== -->
     <aside id="sidebar">
         <div class="logo-container">
-            <img src="../src/assets/logo-topo.png" alt="Logo CorteFácil">
+            <img src="{{ url_for('static', filename='src/assets/logo-topo.png') }}" alt="Logo CorteFácil">
         </div>
         
         <nav>
@@ -238,8 +238,9 @@
     <!-- Adicione os scripts do Flatpickr aqui no final -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-    <script src="../src/js/components/components.js"></script>
-    <script src="../src/js/components/formatador_telefone.js"></script>
-    <script src="../src/js/pagina_inicial.js"></script>
+    <script src="{{ url_for('static', filename='src/js/components/components.js') }}"></script>
+    <script src="{{ url_for('static', filename='src/js/components/formatador_telefone.js') }}"></script>
+    <script src="{{ url_for('static', filename='src/js/pagina_inicial.js') }}"></script>
+    
 </body>
 </html>
