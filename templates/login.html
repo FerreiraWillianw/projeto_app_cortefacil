@@ -12,11 +12,13 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
-    <!-- Lembre-se de conectar o seu CSS aqui! -->
-    <link rel="stylesheet" href="/static/src/css/style.css">
+    <!-- 1. CSS ATUALIZADO: Usando a fórmula mágica do Flask -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/style.css') }}">
 </head>
 <body>
-    <img src="/static/src/assets/logo-topo.png" alt="Logo CorteFácil" class="logo-topo">
+    <!-- 2. IMAGEM ATUALIZADA: O Flask agora acha a sua logo na pasta static -->
+    <img src="{{ url_for('static', filename='src/assets/logo-topo.png') }}" alt="Logo CorteFácil" class="logo-topo">
+    
     <div id="login-container">
         <h2>Login</h2> 
         
@@ -86,9 +88,11 @@
             </form>
         </div>
         
-        
-        <p>Ainda não tem conta? <a href="cadastro.html">Cadastre-se aqui</a></p>
+        <!-- 3. LINK ATUALIZADO: Aponta para a Rota '/cadastro' e não para o arquivo .html -->
+        <p>Ainda não tem conta? <a href="/cadastro">Cadastre-se aqui</a></p>
     </div>
-    <script src="/static/src/js/login.js"></script>
+    
+    <!-- 4. JAVASCRIPT ATUALIZADO: Usando a fórmula mágica do Flask -->
+    <script src="{{ url_for('static', filename='src/js/login.js') }}"></script>
 </body>
 </html>

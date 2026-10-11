@@ -12,11 +12,13 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     
-    <!-- Lembre-se de conectar o seu CSS aqui! -->
-    <link rel="stylesheet" href="/static/src/css/style.css">
+    <!-- 1. CSS ATUALIZADO: Usando a fórmula mágica do Flask -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='src/css/style.css') }}">
 </head>
 <body>
-    <img src="/static/src/assets/logo-topo.png" alt="Logo CorteFácil" class="logo-topo">
+    <!-- 2. IMAGEM ATUALIZADA: O Flask agora acha a sua logo na pasta static -->
+    <img src="{{ url_for('static', filename='src/assets/logo-topo.png') }}" alt="Logo CorteFácil" class="logo-topo">
+    
     <div id="login-container">
         <!-- SEÇÃO 1: FORMULÁRIO DE DADOS -->
         <div id="secao-dados">
@@ -47,7 +49,9 @@
                 </div>
                 <button type="submit" id="btn-enviar-dados">Cadastrar</button>
             </form>
-            <p>Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+            
+            <!-- 3. LINK ATUALIZADO: Aponta para a Rota '/login' e não para o arquivo .html -->
+            <p>Já tem uma conta? <a href="/">Faça login aqui</a></p>
         </div>
 
         <!-- SEÇÃO 2: VERIFICAÇÃO DE CÓDIGO (Começa invisível) -->
@@ -72,6 +76,7 @@
         </div>
     </div>
 
-    <script src="/static/src/js/cadastro.js"></script>
+    <!-- 4. JAVASCRIPT ATUALIZADO: Usando a fórmula mágica do Flask -->
+    <script src="{{ url_for('static', filename='src/js/cadastro.js') }}"></script>
 </body>
 </html>

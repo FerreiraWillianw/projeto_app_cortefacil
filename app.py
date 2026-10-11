@@ -77,6 +77,14 @@ def pagina_inicial():
     # O Python vai procurar este arquivo automaticamente dentro da pasta 'templates'
     return render_template('login.html')
 
+@app.route('/painel')
+def painel_barbeiro():
+    return render_template('pagina_inicial.html')
+
+@app.route('/cadastro', methods=['GET'])
+def tela_cadastro():
+    return render_template('cadastro.html')
+
 # ==============================================================
 # ROTA: LOGIN
 # ==============================================================
