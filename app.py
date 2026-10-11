@@ -27,6 +27,10 @@ cadastros_pendentes = {}
 codigos_recuperacao = {}
 
 # 2. Função de E-mail
+
+# ==============================================================
+# FUNÇÃO: ENVIAR E-MAIL COM CÓDIGO (COM TRAVA DE SEGURANÇA)
+# ==============================================================
 def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
     mensagem = MIMEMultipart()
     mensagem['From'] = email_sistema
@@ -59,13 +63,16 @@ def enviar_email_codigo(destinatario, codigo, motivo="cadastro"):
     mensagem.attach(MIMEText(corpo_email, 'plain'))
 
     try:
-        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        # AQUI ESTÁ A MÁGICA: Adicionamos o timeout=15
+        # O Python só vai esperar 15 segundos pela resposta do Gmail.
+        servidor = smtplib.SMTP('smtp.gmail.com', 587, timeout=15)
         servidor.starttls() 
         servidor.login(email_sistema, senha_sistema) 
         servidor.send_message(mensagem) 
         servidor.quit() 
         return True
     except Exception as e:
+        # Se demorar mais de 15 segundos, ou a senha estiver errada, ele cai aqui com segurança!
         print("Erro ao enviar e-mail:", e)
         return False
 
