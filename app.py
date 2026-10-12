@@ -357,7 +357,7 @@ def listar_barbeiros():
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
 # ==============================================================
-# ROTA 7: BUSCAR DISPONIBILIDADE DO BARBEIRO
+# ROTA: BUSCAR DISPONIBILIDADE (AGORA COM DOIS TURNOS)
 # ==============================================================
 @app.route('/api/barbeiros/<int:barbeiro_id>/disponibilidade', methods=["GET"])
 def buscar_disponibilidade(barbeiro_id):
@@ -365,8 +365,9 @@ def buscar_disponibilidade(barbeiro_id):
         conexao = psycopg2.connect(db_url)
         cursor = conexao.cursor()
 
+        # 1. SQL ATUALIZADO: Lemos as 5 colunas da nossa nova estrutura
         comando_sql = """
-            SELECT dia_semana, hora_inicio, hora_fim
+            SELECT dia_semana, turno1_inicio, turno1_fim, turno2_inicio, turno2_fim
             FROM disponibilidade_barbeiro
             WHERE barbeiro_id = %s
             ORDER BY dia_semana ASC;
@@ -378,13 +379,21 @@ def buscar_disponibilidade(barbeiro_id):
         cursor.close()
         conexao.close()
 
-        # Monta a lista com os dias e jornadas cadastradas
+        # 2. MONTAGEM DA LISTA
         dias_permitidos = []
         for reg in registros:
+            
+            # Tratamento de segurança para o Turno 2 (pode ser NULL/None se ele não trabalhar de tarde)
+            t2_ini = str(reg[3]) if reg[3] is not None else None
+            t2_fim = str(reg[4]) if reg[4] is not None else None
+
+            # Construímos o pacote de dados para enviar ao JavaScript
             dias_permitidos.append({
                 "dia_semana": reg[0],
-                "hora_inicio": str(reg[1]),
-                "hora_fim": str(reg[2])
+                "turno1_inicio": str(reg[1]), # Turno 1 é obrigatório, convertemos direto
+                "turno1_fim": str(reg[2]),
+                "turno2_inicio": t2_ini,
+                "turno2_fim": t2_fim
             })
 
         return jsonify({
@@ -394,10 +403,10 @@ def buscar_disponibilidade(barbeiro_id):
 
     except Exception as erro:
         print("ERRO AO BUSCAR DISPONIBILIDADE:", erro)
-        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor ao ler horários."}), 500
 
 # ==============================================================
-# ROTA 8: BUSCAR HORÁRIOS DISPONÍVEIS NO DIA
+# ROTA: GERAR HORÁRIOS DISPONÍVEIS (PULA O HORÁRIO DE ALMOÇO)
 # ==============================================================
 @app.route('/api/barbeiros/<int:barbeiro_id>/horarios', methods=['GET'])
 def buscar_horarios(barbeiro_id):
@@ -412,28 +421,29 @@ def buscar_horarios(barbeiro_id):
         data_obj = datetime.strptime(data_str, '%Y-%m-%d')
         
         # TRUQUE: O Python diz que Segunda é 0 e Domingo é 6. 
-        # Nós usamos esta matemática para converter para o padrão do JS (Domingo = 0)
+        # Convertendo para o padrão do JS (Domingo = 0)
         dia_semana = (data_obj.weekday() + 1) % 7 
 
         conexao = psycopg2.connect(db_url)
         cursor = conexao.cursor()
 
-        # 2. Buscar o horário de expediente do barbeiro neste dia
+        # 2. Buscar o horário de expediente (OS DOIS TURNOS) do barbeiro neste dia
         cursor.execute("""
-            SELECT hora_inicio, hora_fim
+            SELECT turno1_inicio, turno1_fim, turno2_inicio, turno2_fim
             FROM disponibilidade_barbeiro
             WHERE barbeiro_id = %s AND dia_semana = %s
         """, (barbeiro_id, dia_semana))
+        
         expediente = cursor.fetchone()
 
-        # Se não houver expediente, devolvemos a lista vazia
+        # Se não houver expediente (dia de folga), devolvemos a lista vazia
         if not expediente:
             cursor.close()
             conexao.close()
             return jsonify({"sucesso": True, "horarios": []}), 200
 
-        hora_inicio_banco = expediente[0] # Ex: 08:00:00
-        hora_fim_banco = expediente[1]    # Ex: 19:00:00
+        # Desempacotamos as 4 colunas. (O Turno 2 pode vir como 'None')
+        t1_inicio, t1_fim, t2_inicio, t2_fim = expediente
 
         # 3. Buscar os horários que JÁ ESTÃO OCUPADOS na tabela de agendamentos
         cursor.execute("""
@@ -446,7 +456,7 @@ def buscar_horarios(barbeiro_id):
         cursor.close()
         conexao.close()
 
-        # Pegamos os resultados do banco e formatamos para texto "HH:MM" (Ex: "14:30")
+        # Pegamos os resultados do banco e formatamos para texto "HH:MM"
         horarios_ocupados = []
         for ocupado in ocupados_banco:
             hora_formatada = ocupado[0].strftime('%H:%M')
@@ -455,20 +465,32 @@ def buscar_horarios(barbeiro_id):
         # 4. A FÁBRICA DE HORÁRIOS (De 30 em 30 minutos)
         horarios_livres = []
 
-        # Juntamos a data com a hora para o Python conseguir fazer as contas de tempo
-        hora_atual = datetime.combine(data_obj, hora_inicio_banco)
-        hora_final = datetime.combine(data_obj, hora_fim_banco)
+        # ======================================================
+        # FUNÇÃO AJUDANTE: Cria os intervalos para um turno específico
+        # ======================================================
+        def gerar_intervalos_do_turno(inicio_banco, fim_banco):
+            # Se o turno estiver vazio (ex: turno 2 nulo), ignoramos em segurança
+            if not inicio_banco or not fim_banco:
+                return
+            
+            # Juntamos a data escolhida com a hora para o Python conseguir fazer matemática
+            hora_atual = datetime.combine(data_obj, inicio_banco)
+            hora_final = datetime.combine(data_obj, fim_banco)
 
-        # Enquanto a hora atual for menor que a hora de saída...
-        while hora_atual < hora_final:
-            hora_texto = hora_atual.strftime('%H:%M')
+            # Enquanto a hora atual for menor que a hora de saída do turno...
+            while hora_atual < hora_final:
+                hora_texto = hora_atual.strftime('%H:%M')
+                
+                # Se este horário NÃO estiver na lista de ocupados, é livre!
+                if hora_texto not in horarios_ocupados:
+                    horarios_livres.append(hora_texto)
+                
+                # Dá um salto de 30 minutos para fabricar o próximo botão
+                hora_atual += timedelta(minutes=30)
 
-            # Se este horário NÃO estiver na lista de ocupados, adicionamos aos livres!
-            if hora_texto not in horarios_ocupados:
-                horarios_livres.append(hora_texto)
-
-            # Dá um salto de 30 minutos para testar o próximo horário
-            hora_atual += timedelta(minutes=30)
+        # 5. LIGAMOS A MÁQUINA DUAS VEZES!
+        gerar_intervalos_do_turno(t1_inicio, t1_fim) # Fabrica os horários da Manhã
+        gerar_intervalos_do_turno(t2_inicio, t2_fim) # Fabrica os horários da Tarde (se existirem)
 
         return jsonify({"sucesso": True, "horarios": horarios_livres}), 200
 
@@ -647,15 +669,31 @@ def atualizar_perfil(barbeiro_id):
         # 3. Inserir a nova disponibilidade
         if nova_disponibilidade:
             comando_insert = """
-                INSERT INTO disponibilidade_barbeiro (barbeiro_id, dia_semana, hora_inicio, hora_fim)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO disponibilidade_barbeiro (
+                    barbeiro_id, dia_semana, 
+                    turno1_inicio, turno1_fim, 
+                    turno2_inicio, turno2_fim
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
+
             for disp in nova_disponibilidade:
+
+                # Pegamos os valores do Turno 2
+                t2_ini = disp.get('turno2_inicio')
+                t2_fim = disp.get('turno2_fim')
+                
+                # Se por acaso vier uma string vazia "", forçamos a virar None (NULL)
+                if t2_ini == "": t2_ini = None
+                if t2_fim == "": t2_fim = None
+
                 cursor.execute(comando_insert, (
                     barbeiro_id, 
-                    int(disp['dia_semana']), # Forçamos para Inteiro, respeitando a sua tabela!
-                    disp['hora_inicio'], 
-                    disp['hora_fim']
+                    int(disp['dia_semana']), 
+                    disp['turno1_inicio'],   
+                    disp['turno1_fim'],      
+                    t2_ini, # Passamos a nossa variável tratada
+                    t2_fim  # Passamos a nossa variável tratada
                 ))
 
         # 4. Guardamos as alterações
