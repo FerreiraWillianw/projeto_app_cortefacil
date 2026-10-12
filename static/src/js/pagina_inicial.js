@@ -396,13 +396,29 @@ if (selectDiasTrabalho) {
                     linhaHorario.classList.add('linha-horario-dinamico'); 
                     linhaHorario.id = `linha-dia-${diaId}`;
                     
+
                     // AMBOS os inputs agora são type="text" para o Flatpickr funcionar perfeitamente
                     linhaHorario.innerHTML = `
                         <span class="nome-dia-dinamico">${nomesDosDias[diaId]}</span>
-                        <div class="controles-hora-dinamico">
-                            <input type="text" id="inicio-dia-${diaId}" placeholder="00:00" required>
-                            <span>às</span>
-                            <input type="text" id="fim-dia-${diaId}" placeholder="00:00" required>
+                        
+                        <div class="controles-hora-dinamico" style="display:flex; flex-direction:column; gap:10px;">
+                            
+                            <!-- BLOCO DO TURNO 1 (MANHÃ) -->
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <span style="font-size:12px; font-weight:bold; color:#555; width:45px;">Turno 1:</span>
+                                <input type="text" id="t1-inicio-dia-${diaId}" placeholder="08:00" required>
+                                <span>às</span>
+                                <input type="text" id="t1-fim-dia-${diaId}" placeholder="12:00" required>
+                            </div>
+
+                            <!-- BLOCO DO TURNO 2 (TARDE - OPCIONAL) -->
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <span style="font-size:12px; font-weight:bold; color:#555; width:45px;">Turno 2:</span>
+                                <input type="text" id="t2-inicio-dia-${diaId}" placeholder="13:00">
+                                <span>às</span>
+                                <input type="text" id="t2-fim-dia-${diaId}" placeholder="18:00">
+                            </div>
+
                         </div>
                     `;
                     containerHorarios.appendChild(linhaHorario);
@@ -413,11 +429,14 @@ if (selectDiasTrabalho) {
                         noCalendar: true,
                         dateFormat: "H:i",
                         time_24hr: true,
-                        disableMobile: "true"
+                        disableMobile: "true",
+                        allowInput: true
                     };
 
-                    flatpickr(`#inicio-dia-${diaId}`, configFlatpickr);
-                    flatpickr(`#fim-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#t1-inicio-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#t1-fim-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#t2-inicio-dia-${diaId}`, configFlatpickr);
+                    flatpickr(`#t2-fim-dia-${diaId}`, configFlatpickr);
                     
                 } else {
                     // A linha já existia, apenas volta a aparecer
@@ -525,13 +544,19 @@ async function carregarMeuPerfil() {
             // Passo D: Agora que as caixas foram desenhadas, preenchemos os valores lá dentro!
             disponibilidadeSalva.forEach(item => {
                 const diaId = String(item.dia_semana);
-                const inputInicio = document.getElementById(`inicio-dia-${diaId}`);
-                const inputFim = document.getElementById(`fim-dia-${diaId}`);
+                const inputT1Inicio = document.getElementById(`t1-inicio-dia-${diaId}`);
+                const inputT1Fim = document.getElementById(`t1-fim-dia-${diaId}`);
+                const inputT2Inicio = document.getElementById(`t2-inicio-dia-${diaId}`);
+                const inputT2Fim = document.getElementById(`t2-fim-dia-${diaId}`);
 
-                if (inputInicio && inputFim) {
-                    // O slice(0, 5) corta os segundos do banco de dados ("09:00:00" e vira "09:00")
-                    inputInicio.value = item.hora_inicio.slice(0, 5)
-                    inputFim.value = item.hora_fim.slice(0, 5)
+
+                if (inputT1Inicio && inputT1Fim) {
+                    if(item.turno1_inicio) inputT1Inicio.value = item.turno1_inicio.slice(0, 5);
+                    if(item.turno1_fim) inputT1Fim.value = item.turno1_fim.slice(0, 5);
+                    
+                    // Como o turno 2 é opcional, só preenche se existir no banco
+                    if(item.turno2_inicio && inputT2Inicio) inputT2Inicio.value = item.turno2_inicio.slice(0, 5);
+                    if(item.turno2_fim && inputT2Fim) inputT2Fim.value = item.turno2_fim.slice(0, 5);
                 }
             });
         }
@@ -555,27 +580,38 @@ if (btnSalvarPerfil) {
 
         // 2. Verificamos os horários de cada dia selecionado
         for (let dia of opcoesSelecionadas) {
-            const inicio = document.getElementById(`inicio-dia-${dia}`).value;
-            const fim = document.getElementById(`fim-dia-${dia}`).value;
+            const t1Inicio = document.getElementById(`t1-inicio-dia-${dia}`).value;
+            const t1Fim = document.getElementById(`t1-fim-dia-${dia}`).value;
+            const t2Inicio = document.getElementById(`t2-inicio-dia-${dia}`).value;
+            const t2Fim = document.getElementById(`t2-fim-dia-${dia}`).value;
 
-            // Validação: Se marcou o dia, é obrigatório colocar a hora
-            if (!inicio || !fim) {
+            // Validação 1: O primeiro turno (Manhã) é sempre obrigatório
+            if (!t1Inicio || !t1Fim) {
                 const nomeDoDia = nomesDosDias[dia];
-                alert(`⚠️ Atenção: Preencha o horário de início e fim para ${nomeDoDia}, ou desmarque este dia.`);
-                return; // O 'return' cancela a gravação e para o código aqui
+                alert(`⚠️ Atenção: Preencha o horário do Turno 1 (Manhã) para ${nomeDoDia}, ou desmarque este dia.`);
+                return; 
+            }
+
+            // Validação 2: Se preencheu metade do turno 2, exige a outra metade
+            if ((t2Inicio && !t2Fim) || (!t2Inicio && t2Fim)) {
+                const nomeDoDia = nomesDosDias[dia];
+                alert(`⚠️ Atenção: O Turno 2 (Tarde) para ${nomeDoDia} está incompleto. Preencha início e fim, ou deixe ambos em branco.`);
+                return;
             }
 
             // Guardamos os dados validados na nossa lista
             novaDisponibilidade.push({
                 dia_semana: dia,
-                hora_inicio: inicio,
-                hora_fim: fim
+                turno1_inicio: t1Inicio,
+                turno1_fim: t1Fim,
+                turno2_inicio: t2Inicio === "" ? null : t2Inicio,
+                turno2_fim: t2Fim === "" ? null : t2Fim
             });
         }
 
         // 3. Mudamos o botão para dar feedback visual
         const textoOriginal = btnSalvarPerfil.textContent;
-        btnSalvarPerfil.textContent = 'A guardar os horários...';
+        btnSalvarPerfil.textContent = 'Salvando horários...';
         btnSalvarPerfil.disabled = true;
 
         try {
