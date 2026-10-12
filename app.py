@@ -357,7 +357,7 @@ def listar_barbeiros():
         return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
 
 # ==============================================================
-# ROTA 7: BUSCAR DISPONIBILIDADE DO BARBEIRO
+# ROTA: BUSCAR DISPONIBILIDADE (AGORA COM DOIS TURNOS)
 # ==============================================================
 @app.route('/api/barbeiros/<int:barbeiro_id>/disponibilidade', methods=["GET"])
 def buscar_disponibilidade(barbeiro_id):
@@ -365,8 +365,9 @@ def buscar_disponibilidade(barbeiro_id):
         conexao = psycopg2.connect(db_url)
         cursor = conexao.cursor()
 
+        # 1. SQL ATUALIZADO: Lemos as 5 colunas da nossa nova estrutura
         comando_sql = """
-            SELECT dia_semana, hora_inicio, hora_fim
+            SELECT dia_semana, turno1_inicio, turno1_fim, turno2_inicio, turno2_fim
             FROM disponibilidade_barbeiro
             WHERE barbeiro_id = %s
             ORDER BY dia_semana ASC;
@@ -378,13 +379,21 @@ def buscar_disponibilidade(barbeiro_id):
         cursor.close()
         conexao.close()
 
-        # Monta a lista com os dias e jornadas cadastradas
+        # 2. MONTAGEM DA LISTA
         dias_permitidos = []
         for reg in registros:
+            
+            # Tratamento de segurança para o Turno 2 (pode ser NULL/None se ele não trabalhar de tarde)
+            t2_ini = str(reg[3]) if reg[3] is not None else None
+            t2_fim = str(reg[4]) if reg[4] is not None else None
+
+            # Construímos o pacote de dados para enviar ao JavaScript
             dias_permitidos.append({
                 "dia_semana": reg[0],
-                "hora_inicio": str(reg[1]),
-                "hora_fim": str(reg[2])
+                "turno1_inicio": str(reg[1]), # Turno 1 é obrigatório, convertemos direto
+                "turno1_fim": str(reg[2]),
+                "turno2_inicio": t2_ini,
+                "turno2_fim": t2_fim
             })
 
         return jsonify({
@@ -394,7 +403,7 @@ def buscar_disponibilidade(barbeiro_id):
 
     except Exception as erro:
         print("ERRO AO BUSCAR DISPONIBILIDADE:", erro)
-        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor."}), 500
+        return jsonify({"sucesso": False, "mensagem": "Erro interno no servidor ao ler horários."}), 500
 
 # ==============================================================
 # ROTA 8: BUSCAR HORÁRIOS DISPONÍVEIS NO DIA
@@ -647,15 +656,25 @@ def atualizar_perfil(barbeiro_id):
         # 3. Inserir a nova disponibilidade
         if nova_disponibilidade:
             comando_insert = """
-                INSERT INTO disponibilidade_barbeiro (barbeiro_id, dia_semana, hora_inicio, hora_fim)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO disponibilidade_barbeiro (
+                    barbeiro_id, dia_semana, 
+                    turno1_inicio, turno1_fim, 
+                    turno2_inicio, turno2_fim
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
             """
+
             for disp in nova_disponibilidade:
                 cursor.execute(comando_insert, (
                     barbeiro_id, 
                     int(disp['dia_semana']), # Forçamos para Inteiro, respeitando a sua tabela!
-                    disp['hora_inicio'], 
-                    disp['hora_fim']
+                    disp['turno1_inicio'],   # Turno 1 é obrigatório
+                    disp['turno1_fim'],      # Turno 1 é obrigatório
+                    
+                    # Usamos .get() para os turnos 2. 
+                    # Se vier vazio do JS, o Python transforma em 'None' (que vira NULL no banco)
+                    disp.get('turno2_inicio'), 
+                    disp.get('turno2_fim')
                 ))
 
         # 4. Guardamos as alterações
