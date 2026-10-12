@@ -429,7 +429,8 @@ if (selectDiasTrabalho) {
                         noCalendar: true,
                         dateFormat: "H:i",
                         time_24hr: true,
-                        disableMobile: "true"
+                        disableMobile: "true",
+                        allowInput: true
                     };
 
                     flatpickr(`#t1-inicio-dia-${diaId}`, configFlatpickr);
@@ -603,8 +604,8 @@ if (btnSalvarPerfil) {
                 dia_semana: dia,
                 turno1_inicio: t1Inicio,
                 turno1_fim: t1Fim,
-                turno2_inicio: t2Inicio || null, // Manda nulo se estiver vazio
-                turno2_fim: t2Fim || null
+                turno2_inicio: t2Inicio === "" ? null : t2Inicio,
+                turno2_fim: t2Fim === "" ? null : t2Fim
             });
         }
 
