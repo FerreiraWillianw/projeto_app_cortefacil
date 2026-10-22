@@ -2,13 +2,12 @@
 // CAIXA DE FERRAMENTAS: COMPONENTES GLOBAIS
 // ==========================================
 
-const URL_API_GLOBAL = 'http://127.0.0.1:5000';
 
 /**
  * COMPONENTE 1: CALENDÁRIO COM BLOQUEIOS
- * @param {string} idDoInput - ID do campo HTML
- * @param {Array} diasDeTrabalho - Dias permitidos [1,2,3...]
- * @param {Function} aoMudarData - (Opcional) O que fazer quando a data é escolhida
+ * @param {string} idDoInputID do campo HTML
+ * @param {Array} diasDeTrabalhoDias permitidos [1,2,3...]
+ * @param {Function} aoMudarData(Opcional) O que fazer quando a data é escolhida
  */
 function criarComponenteData(idDoInput, diasDeTrabalho = [], aoMudarData = null) {
     return flatpickr(document.getElementById(idDoInput), {
@@ -34,9 +33,9 @@ function criarComponenteData(idDoInput, diasDeTrabalho = [], aoMudarData = null)
 
 /**
  * COMPONENTE 2: BUSCAR HORÁRIOS LIVRES NO PYTHON
- * @param {number} barbeiroId - ID do barbeiro
- * @param {string} dataSelecionada - Data escolhida (YYYY-MM-DD)
- * @param {string} idSelectHora - O ID do <select> HTML que vai receber as opções
+ * @param {number} barbeiroIdID do barbeiro
+ * @param {string} dataSelecionadaData escolhida (YYYY-MM-DD)
+ * @param {string} idSelectHoraO ID do <select> HTML que vai receber as opções
  */
 async function carregarHorariosDisponiveis(barbeiroId, dataSelecionada, idSelectHora) {
     const selectHora = document.getElementById(idSelectHora);
@@ -45,7 +44,8 @@ async function carregarHorariosDisponiveis(barbeiroId, dataSelecionada, idSelect
     selectHora.disabled = true;
 
     try {
-        const resposta = await fetch(`${URL_API_GLOBAL}/api/barbeiros/${barbeiroId}/horarios?data=${dataSelecionada}`);
+        // 2. FETCH ATUALIZADO: Usando a BASE_URL dinâmica para a requisição
+        const resposta = await fetch(`${BASE_URL}/api/barbeiros/${barbeiroId}/horarios?data=${dataSelecionada}`);
         const dados = await resposta.json();
 
         if (dados.sucesso) {
