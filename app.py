@@ -486,7 +486,7 @@ def buscar_horarios(barbeiro_id):
                     horarios_livres.append(hora_texto)
                 
                 # Dá um salto de 30 minutos para fabricar o próximo botão
-                hora_atual += timedelta(minutes=30)
+                hora_atual += timedelta(minutes=60)
 
         # 5. LIGAMOS A MÁQUINA DUAS VEZES!
         gerar_intervalos_do_turno(t1_inicio, t1_fim) # Fabrica os horários da Manhã
